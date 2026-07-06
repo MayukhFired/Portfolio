@@ -1,0 +1,16 @@
+.lanyard-wrapper {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 500px; /* Limit height so it fits well alongside text details */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: scale(1);
+  transform-origin: center;
+}
+@media (min-width: 768px) {
+  .lanyard-wrapper {
+    height: 600px;
+  }
+}
