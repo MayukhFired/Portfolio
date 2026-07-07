@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useEffect, useState } from 'react';
 import OrbitJourney from './OrbitJourney';
+import DotField from './DotField';
 
 /* ── Stats ── */
 const stats = [
@@ -69,9 +70,23 @@ export default function About() {
 
   return (
     <section id="about" className="relative py-40 md:py-48 scroll-mt-24 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 grid-bg opacity-30" />
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-30" />
+      {/* DotField background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <DotField
+          dotRadius={1.5}
+          dotSpacing={14}
+          bulgeStrength={67}
+          glowRadius={160}
+          sparkle={false}
+          waveAmplitude={0}
+          gradientFrom="rgba(34, 211, 238, 0.18)"
+          gradientTo="rgba(167, 139, 250, 0.12)"
+          glowColor="#080b12"
+        />
+      </div>
+
+      {/* Subtle dark overlay so content stays readable */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(8,11,18,0.55)' }} />
 
       {/* Ambient orbs */}
       <div className="absolute top-1/3 right-16 w-80 h-80 bg-violet-500 rounded-full opacity-[0.04] blur-[120px] pointer-events-none" />
