@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
 import CustomCursor from '@/components/CustomCursor';
 import LoadingScreen from '@/components/LoadingScreen';
 import Navbar from '@/components/Navbar';
@@ -14,14 +13,11 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [loaded, setLoaded] = useState(false);
-  const pathname = usePathname();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const isLoaded = sessionStorage.getItem('site-loaded');
-      if (isLoaded) {
-        setLoaded(true);
-      }
+      if (isLoaded) setLoaded(true);
     }
   }, []);
 
@@ -33,7 +29,7 @@ export default function ClientLayout({
   return (
     <>
       <CustomCursor />
-      
+
       <AnimatePresence mode="wait">
         {!loaded && (
           <LoadingScreen key="loader" onComplete={handleLoadComplete} />
@@ -42,29 +38,16 @@ export default function ClientLayout({
 
       <div className="scanline" />
 
-      {/* Main layout container */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: loaded ? 1 : 0 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.6 }}
         className="relative min-h-screen flex flex-col justify-between"
       >
         <Navbar />
-        
-        {/* Animated page transitions */}
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={pathname}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="flex-grow"
-          >
-            {children}
-          </motion.main>
-        </AnimatePresence>
-        
+        <main className="flex-grow">
+          {children}
+        </main>
         <Footer />
       </motion.div>
     </>

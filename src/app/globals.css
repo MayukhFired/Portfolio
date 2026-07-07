@@ -3,30 +3,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-cyan-400: #00f5ff;
-  --color-purple-400: #7b2fff;
-  --color-purple-500: #6b1fff;
-  --color-green-400: #00ff88;
-  --color-yellow-400: #ffd700;
+  --color-cyan-400: #22d3ee;
+  --color-cyan-300: #67e8f9;
+  --color-violet-400: #a78bfa;
+  --color-violet-500: #8b5cf6;
+  --color-violet-600: #7c3aed;
+  --color-emerald-400: #34d399;
+  --color-amber-400: #fbbf24;
   --font-family-sans: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-mono: 'JetBrains Mono', monospace;
 }
 
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #14141f;
-  --bg-glass: rgba(20, 20, 31, 0.6);
-  
-  --cyan-primary: #00f5ff;
-  --cyan-glow: rgba(0, 245, 255, 0.5);
-  --purple-primary: #7b2fff;
-  --purple-glow: rgba(123, 47, 255, 0.5);
-  --green-primary: #00ff88;
-  --green-glow: rgba(0, 255, 136, 0.5);
-  
-  --text-primary: #e5e5e5;
-  --text-secondary: #a0a0b0;
-  --text-dim: #6a6a7a;
+  /* Backgrounds — slightly blue-tinted dark for depth */
+  --bg-primary: #080b12;
+  --bg-secondary: #0f1220;
+  --bg-glass: rgba(15, 18, 32, 0.65);
+
+  /* Cyan — cooler, slightly less neon, more professional */
+  --cyan-primary: #22d3ee;
+  --cyan-glow: rgba(34, 211, 238, 0.4);
+
+  /* Violet — replaces harsh purple, feels more luxurious */
+  --violet-primary: #a78bfa;
+  --violet-glow: rgba(167, 139, 250, 0.4);
+
+  /* Emerald — replaces harsh green, softer but still vivid */
+  --emerald-primary: #34d399;
+  --emerald-glow: rgba(52, 211, 153, 0.35);
+
+  /* Text */
+  --text-primary: #f0f4ff;
+  --text-secondary: #8892aa;
+  --text-dim: #4a5168;
 }
 
 *, ::before, ::after {
@@ -47,7 +56,7 @@ body {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -55,144 +64,104 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--cyan-primary);
-  border-radius: 4px;
+  background: var(--violet-primary);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--purple-primary);
+  background: var(--cyan-primary);
 }
 
 /* Selection */
 ::selection {
-  background: var(--cyan-glow);
-  color: var(--bg-primary);
+  background: rgba(167, 139, 250, 0.3);
+  color: var(--text-primary);
 }
 
-/* Keyframe Animations */
+/* ── Keyframe Animations ── */
 @keyframes glitch {
-  0% {
-    transform: translate(0);
-  }
-  20% {
-    transform: translate(-2px, 2px);
-  }
-  40% {
-    transform: translate(-2px, -2px);
-  }
-  60% {
-    transform: translate(2px, 2px);
-  }
-  80% {
-    transform: translate(2px, -2px);
-  }
-  100% {
-    transform: translate(0);
-  }
+  0%   { transform: translate(0); }
+  20%  { transform: translate(-2px, 2px); }
+  40%  { transform: translate(-2px, -2px); }
+  60%  { transform: translate(2px, 2px); }
+  80%  { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
 }
 
 @keyframes neon-pulse {
   0%, 100% {
-    text-shadow: 0 0 10px var(--cyan-glow), 0 0 20px var(--cyan-glow), 0 0 30px var(--cyan-glow);
+    text-shadow: 0 0 8px var(--cyan-glow), 0 0 20px var(--cyan-glow);
   }
   50% {
-    text-shadow: 0 0 20px var(--cyan-glow), 0 0 30px var(--cyan-glow), 0 0 40px var(--cyan-glow), 0 0 50px var(--cyan-glow);
+    text-shadow: 0 0 16px var(--cyan-glow), 0 0 32px var(--cyan-glow), 0 0 48px var(--cyan-glow);
   }
 }
 
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-18px); }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scanline {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100vh);
-  }
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
 }
 
 @keyframes gradient-shift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
 }
 
 @keyframes border-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 @keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
+  from { width: 0; }
+  to   { width: 100%; }
 }
 
 @keyframes blink {
-  50% {
-    border-color: transparent;
-  }
+  50% { border-color: transparent; }
 }
 
-/* Utility Classes */
+/* ── Utility Classes ── */
 .glass-effect {
   background: var(--bg-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .neon-border-cyan {
-  border: 2px solid var(--cyan-primary);
-  box-shadow: 0 0 10px var(--cyan-glow), inset 0 0 10px var(--cyan-glow);
+  border: 1.5px solid var(--cyan-primary);
+  box-shadow: 0 0 12px var(--cyan-glow), inset 0 0 8px rgba(34, 211, 238, 0.08);
 }
 
-.neon-border-purple {
-  border: 2px solid var(--purple-primary);
-  box-shadow: 0 0 10px var(--purple-glow), inset 0 0 10px var(--purple-glow);
+.neon-border-violet {
+  border: 1.5px solid var(--violet-primary);
+  box-shadow: 0 0 12px var(--violet-glow), inset 0 0 8px rgba(167, 139, 250, 0.08);
 }
 
 .neon-text-cyan {
   color: var(--cyan-primary);
-  text-shadow: 0 0 10px var(--cyan-glow), 0 0 20px var(--cyan-glow);
+  text-shadow: 0 0 12px var(--cyan-glow), 0 0 24px var(--cyan-glow);
 }
 
-.neon-text-purple {
-  color: var(--purple-primary);
-  text-shadow: 0 0 10px var(--purple-glow), 0 0 20px var(--purple-glow);
+.neon-text-violet {
+  color: var(--violet-primary);
+  text-shadow: 0 0 12px var(--violet-glow), 0 0 24px var(--violet-glow);
 }
 
-.neon-text-green {
-  color: var(--green-primary);
-  text-shadow: 0 0 10px var(--green-glow), 0 0 20px var(--green-glow);
+.neon-text-emerald {
+  color: var(--emerald-primary);
+  text-shadow: 0 0 12px var(--emerald-glow), 0 0 24px var(--emerald-glow);
 }
 
 .glitch-text {
@@ -207,31 +176,37 @@ body {
   width: 100%;
   height: 2px;
   background: linear-gradient(transparent, var(--cyan-primary), transparent);
-  opacity: 0.1;
-  animation: scanline 8s linear infinite;
+  opacity: 0.06;
+  animation: scanline 10s linear infinite;
   pointer-events: none;
   z-index: 9999;
 }
 
-/* Grid Background */
+/* Subtle dot-grid background */
 .grid-bg {
-  background-image: 
-    linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
+  background-image:
+    radial-gradient(circle, rgba(34, 211, 238, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-/* Code Font */
+/* Line grid (used in some sections) */
+.line-grid-bg {
+  background-image:
+    linear-gradient(rgba(167, 139, 250, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(167, 139, 250, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Button Styles */
+/* ── Button Styles ── */
 .btn-primary {
   position: relative;
   background: transparent;
   color: var(--cyan-primary);
-  border: 2px solid var(--cyan-primary);
+  border: 1.5px solid var(--cyan-primary);
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 600;
   cursor: pointer;
@@ -247,7 +222,7 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: var(--cyan-primary);
+  background: linear-gradient(135deg, var(--cyan-primary), var(--violet-primary));
   transition: left 0.3s ease;
   z-index: -1;
 }
@@ -258,12 +233,15 @@ body {
 
 .btn-primary:hover {
   color: var(--bg-primary);
-  box-shadow: 0 0 20px var(--cyan-glow);
+  box-shadow: 0 0 24px var(--cyan-glow), 0 0 48px rgba(34, 211, 238, 0.15);
 }
 
-/* Responsive */
+/* ── Responsive ── */
 @media (max-width: 768px) {
   .grid-bg {
-    background-size: 30px 30px;
+    background-size: 28px 28px;
+  }
+  .line-grid-bg {
+    background-size: 36px 36px;
   }
 }

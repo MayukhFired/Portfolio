@@ -8,25 +8,25 @@ const skillGroups = [
     icon: '🖥',
     color: 'cyan',
     skills: [
-      { name: 'React', level: 92, icon: '⚛' },
-      { name: 'TypeScript', level: 88, icon: 'TS' },
-      { name: 'JavaScript', level: 90, icon: 'JS' },
-      { name: 'HTML / CSS', level: 97, icon: '</>' },
+      { name: 'React',       level: 92, icon: '⚛'  },
+      { name: 'TypeScript',  level: 88, icon: 'TS'  },
+      { name: 'JavaScript',  level: 90, icon: 'JS'  },
+      { name: 'HTML / CSS',  level: 97, icon: '</>' },
     ],
   },
   {
     category: 'Database & Cloud',
     icon: '🗄',
-    color: 'green',
+    color: 'emerald',
     skills: [
       { name: 'Supabase', level: 88, icon: '⚡' },
-      { name: 'SQL', level: 85, icon: '🗄' },
+      { name: 'SQL',      level: 85, icon: '🗄' },
     ],
   },
   {
     category: 'Systems Programming',
     icon: '⚙',
-    color: 'purple',
+    color: 'violet',
     skills: [
       { name: 'C', level: 92, icon: 'C' },
     ],
@@ -34,9 +34,9 @@ const skillGroups = [
   {
     category: 'DevOps & Tools',
     icon: '🔧',
-    color: 'yellow',
+    color: 'amber',
     skills: [
-      { name: 'Git', level: 90, icon: '⎇' },
+      { name: 'Git',    level: 90, icon: '⎇' },
       { name: 'GitHub', level: 90, icon: '🐙' },
       { name: 'Docker', level: 80, icon: '🐳' },
     ],
@@ -49,28 +49,28 @@ const colorMap: Record<string, { text: string; border: string; bg: string; bar: 
     border: 'border-cyan-400/30',
     bg: 'bg-cyan-400/5',
     bar: 'bg-cyan-400',
-    glow: 'shadow-[0_0_8px_rgba(0,245,255,0.6)]',
+    glow: 'shadow-[0_0_8px_rgba(34,211,238,0.5)]',
   },
-  purple: {
-    text: 'text-purple-400',
-    border: 'border-purple-400/30',
-    bg: 'bg-purple-400/5',
-    bar: 'bg-purple-400',
-    glow: 'shadow-[0_0_8px_rgba(123,47,255,0.6)]',
+  violet: {
+    text: 'text-violet-400',
+    border: 'border-violet-400/30',
+    bg: 'bg-violet-400/5',
+    bar: 'bg-violet-400',
+    glow: 'shadow-[0_0_8px_rgba(167,139,250,0.5)]',
   },
-  green: {
-    text: 'text-green-400',
-    border: 'border-green-400/30',
-    bg: 'bg-green-400/5',
-    bar: 'bg-green-400',
-    glow: 'shadow-[0_0_8px_rgba(0,255,136,0.6)]',
+  emerald: {
+    text: 'text-emerald-400',
+    border: 'border-emerald-400/30',
+    bg: 'bg-emerald-400/5',
+    bar: 'bg-emerald-400',
+    glow: 'shadow-[0_0_8px_rgba(52,211,153,0.5)]',
   },
-  yellow: {
-    text: 'text-yellow-400',
-    border: 'border-yellow-400/30',
-    bg: 'bg-yellow-400/5',
-    bar: 'bg-yellow-400',
-    glow: 'shadow-[0_0_8px_rgba(255,220,0,0.6)]',
+  amber: {
+    text: 'text-amber-400',
+    border: 'border-amber-400/30',
+    bg: 'bg-amber-400/5',
+    bar: 'bg-amber-400',
+    glow: 'shadow-[0_0_8px_rgba(251,191,36,0.5)]',
   },
 };
 
@@ -126,7 +126,7 @@ export default function Skills() {
           <h2 className="text-4xl sm:text-5xl font-bold">
             Tech <span className="text-cyan-400">Stack</span>
           </h2>
-          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-purple-500" />
+          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-violet-400" />
         </motion.div>
 
         {/* Floating tech badges */}

@@ -1,35 +1,41 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter, usePathname } from 'next/navigation';
 
 const navLinks = [
-  { href: '/', label: 'Home', code: '01' },
-  { href: '/about', label: 'About', code: '02' },
-  { href: '/skills', label: 'Skills', code: '03' },
-  { href: '/ai-workflow', label: 'AI×Dev', code: '04' },
-  { href: '/projects', label: 'Products', code: '05' },
-  { href: '/contact', label: 'Contact', code: '06' },
+  { href: '#hero',        label: 'Home',     code: '01' },
+  { href: '#about',       label: 'About',    code: '02' },
+  { href: '#skills',      label: 'Skills',   code: '03' },
+  { href: '#ai-workflow', label: 'AI\u00d7Dev',   code: '04' },
+  { href: '#projects',    label: 'Products', code: '05' },
+  { href: '#contact',     label: 'Contact',  code: '06' },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
+  const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      const sections = navLinks.map((l) => l.href.replace('#', ''));
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
+        if (el && window.scrollY >= el.offsetTop - 120) {
+          setActiveSection(sections[i]);
+          break;
+        }
+      }
     };
-
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleNavClick = (href: string) => {
+  const scrollTo = (href: string) => {
     setMenuOpen(false);
-    router.push(href);
+    const el = document.getElementById(href.replace('#', ''));
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -40,19 +46,20 @@ export default function Navbar() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'glass-effect shadow-[0_0_30px_rgba(0,245,255,0.1)]'
+            ? 'glass-effect shadow-[0_0_30px_rgba(34,211,238,0.08)]'
             : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+
             {/* Logo */}
             <motion.button
-              onClick={() => handleNavClick('/')}
+              onClick={() => scrollTo('#hero')}
               className="flex items-center gap-2 group cursor-pointer"
               whileHover={{ scale: 1.05 }}
             >
-              <div className="relative w-10 h-10 border-2 border-cyan-400 flex items-center justify-center overflow-hidden group-hover:shadow-[0_0_20px_rgba(0,245,255,0.7)] transition-all duration-300">
+              <div className="relative w-10 h-10 border-2 border-cyan-400 flex items-center justify-center overflow-hidden group-hover:shadow-[0_0_20px_rgba(34,211,238,0.5)] transition-all duration-300">
                 <span className="font-mono text-[10px] text-cyan-400 font-bold leading-none">&lt;/&gt;</span>
                 <div className="absolute inset-0 bg-cyan-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left opacity-10" />
               </div>
@@ -60,38 +67,36 @@ export default function Navbar() {
             </motion.button>
 
             {/* Desktop Links */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = activeSection === link.href.replace('#', '');
                 return (
                   <motion.button
                     key={link.href}
-                    onClick={() => handleNavClick(link.href)}
+                    onClick={() => scrollTo(link.href)}
                     className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 group cursor-pointer ${
-                      isActive
-                        ? 'text-cyan-400'
-                        : 'text-gray-400 hover:text-cyan-400'
+                      isActive ? 'text-cyan-400' : 'text-gray-400 hover:text-cyan-400'
                     }`}
                     whileHover={{ y: -2 }}
                   >
-                    <span className="font-mono text-xs text-purple-400 mr-1 opacity-60">{link.code}.</span>
+                    <span className="font-mono text-xs text-violet-400 mr-1 opacity-60">{link.code}.</span>
                     {link.label}
                     {isActive && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(0,245,255,0.8)]"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]"
                       />
                     )}
-                    <div className="absolute inset-0 border border-cyan-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+                    <div className="absolute inset-0 border border-cyan-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
                   </motion.button>
                 );
               })}
             </div>
 
-            {/* CTA */}
+            {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-4">
               <motion.button
-                onClick={() => handleNavClick('/contact')}
+                onClick={() => scrollTo('#contact')}
                 className="btn-primary text-sm px-5 py-2 font-semibold tracking-wide cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -100,27 +105,21 @@ export default function Navbar() {
               </motion.button>
             </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Toggle */}
             <button
               className="md:hidden relative w-8 h-6 flex flex-col justify-between cursor-pointer"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Toggle menu"
             >
-              <motion.span
-                className="block h-0.5 bg-cyan-400 w-full"
+              <motion.span className="block h-0.5 bg-cyan-400 w-full"
                 animate={menuOpen ? { rotate: 45, y: 11 } : { rotate: 0, y: 0 }}
-                transition={{ duration: 0.3 }}
-              />
-              <motion.span
-                className="block h-0.5 bg-cyan-400 w-full"
+                transition={{ duration: 0.3 }} />
+              <motion.span className="block h-0.5 bg-cyan-400 w-full"
                 animate={menuOpen ? { opacity: 0 } : { opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
-              <motion.span
-                className="block h-0.5 bg-cyan-400 w-full"
+                transition={{ duration: 0.3 }} />
+              <motion.span className="block h-0.5 bg-cyan-400 w-full"
                 animate={menuOpen ? { rotate: -45, y: -11 } : { rotate: 0, y: 0 }}
-                transition={{ duration: 0.3 }}
-              />
+                transition={{ duration: 0.3 }} />
             </button>
           </div>
         </div>
@@ -138,27 +137,27 @@ export default function Navbar() {
           >
             <div className="flex flex-col p-4 gap-2">
               {navLinks.map((link, i) => {
-                const isActive = pathname === link.href;
+                const isActive = activeSection === link.href.replace('#', '');
                 return (
                   <motion.button
                     key={link.href}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.07 }}
-                    onClick={() => handleNavClick(link.href)}
+                    onClick={() => scrollTo(link.href)}
                     className={`flex items-center gap-3 px-4 py-3 text-left transition-colors duration-200 border border-transparent hover:border-cyan-400/30 cursor-pointer ${
-                      isActive ? 'bg-cyan-400/10 text-cyan-400' : 'hover:bg-cyan-400/10'
+                      isActive ? 'bg-cyan-400/10 text-cyan-400' : 'hover:bg-cyan-400/5'
                     }`}
                   >
-                    <span className="font-mono text-xs text-purple-400">{link.code}.</span>
-                    <span className={`text-gray-300 hover:text-cyan-400 transition-colors ${
-                      isActive ? 'text-cyan-400' : ''
-                    }`}>{link.label}</span>
+                    <span className="font-mono text-xs text-violet-400">{link.code}.</span>
+                    <span className={`text-sm transition-colors ${isActive ? 'text-cyan-400' : 'text-gray-300'}`}>
+                      {link.label}
+                    </span>
                   </motion.button>
                 );
               })}
               <button
-                onClick={() => handleNavClick('/contact')}
+                onClick={() => scrollTo('#contact')}
                 className="btn-primary mt-2 text-sm px-5 py-2 font-semibold tracking-wide cursor-pointer"
               >
                 Hire Me

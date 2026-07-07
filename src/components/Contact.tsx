@@ -53,7 +53,7 @@ export default function Contact() {
 
       {/* Glow blobs */}
       <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-400 rounded-full opacity-3 blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-purple-500 rounded-full opacity-3 blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 right-1/4 w-72 h-72 bg-violet-500 rounded-full opacity-3 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -71,7 +71,7 @@ export default function Contact() {
           <h2 className="text-4xl sm:text-5xl font-bold">
             Get In <span className="text-cyan-400">Touch</span>
           </h2>
-          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-purple-500" />
+          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-violet-400" />
           <p className="text-gray-500 mt-6 text-sm max-w-xl mx-auto">
             Have a project in mind? Let&apos;s build something great together.
           </p>

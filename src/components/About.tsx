@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 
 const stats = [
-  { label: 'Projects Shipped', value: '20+', color: 'cyan' },
-  { label: 'Lines of Code', value: '100K+', color: 'purple' },
-  { label: 'Happy Clients', value: '15+', color: 'green' },
-  { label: 'Years Building', value: '3+', color: 'cyan' },
+  { label: 'Projects Shipped', value: '20+',   color: 'cyan'    },
+  { label: 'Lines of Code',    value: '100K+', color: 'violet'  },
+  { label: 'Happy Clients',    value: '15+',   color: 'emerald' },
+  { label: 'Years Building',   value: '3+',    color: 'cyan'    },
 ];
 
 const timeline = [
@@ -20,13 +20,13 @@ const timeline = [
     year: '2023',
     title: 'Web Pivot',
     desc: 'Dove into JavaScript, HTML/CSS, and web fundamentals. Built responsive frontends.',
-    color: 'purple',
+    color: 'violet',
   },
   {
     year: '2024',
     title: 'Full-Stack Era',
     desc: 'React, TypeScript, Supabase, and SQL. Shipping products, open source, and freelancing.',
-    color: 'green',
+    color: 'emerald',
   },
   {
     year: '2025',
@@ -37,9 +37,9 @@ const timeline = [
 ];
 
 const colorMap: Record<string, string> = {
-  cyan: 'text-cyan-400 border-cyan-400 shadow-[0_0_10px_rgba(0,245,255,0.4)]',
-  purple: 'text-purple-400 border-purple-400 shadow-[0_0_10px_rgba(123,47,255,0.4)]',
-  green: 'text-green-400 border-green-400 shadow-[0_0_10px_rgba(0,255,136,0.4)]',
+  cyan: 'text-cyan-400 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)]',
+  violet: 'text-violet-400 border-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.3)]',
+  emerald: 'text-emerald-400 border-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.3)]',
 };
 
 function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
@@ -87,7 +87,7 @@ export default function About() {
           <h2 className="text-4xl sm:text-5xl font-bold">
             About <span className="text-cyan-400">Me</span>
           </h2>
-          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-purple-500" />
+          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-violet-400" />
         </motion.div>
 
         {/* Stats */}
@@ -148,7 +148,7 @@ export default function About() {
           <div>
             <div className="font-mono text-xs text-purple-400 mb-4 opacity-70">/* JOURNEY */</div>
             <div className="relative">
-              <div className="absolute left-[18px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400 via-purple-500 to-green-400 opacity-30" />
+              <div className="absolute left-[18px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-400 via-violet-400 to-emerald-400 opacity-30" />
               <div className="space-y-10">
                 {timeline.map((item, i) => (
                   <motion.div

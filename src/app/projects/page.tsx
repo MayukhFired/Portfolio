@@ -1,6 +1,2 @@
-'use client';
-import Projects from '@/components/Projects';
-
-export default function ProjectsPage() {
-  return <Projects />;
-}
+import { redirect } from 'next/navigation';
+export default function ProjectsPage() { redirect('/'); }

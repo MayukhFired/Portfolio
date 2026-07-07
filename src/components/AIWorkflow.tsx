@@ -17,7 +17,7 @@ const aiTools = [
     role: 'Reasoning & Design',
     desc: 'Deep reasoning on architecture decisions, code reviews, edge case analysis, and writing.',
     icon: '◆',
-    color: 'purple',
+    color: 'violet',
     tag: 'DAILY',
   },
   {
@@ -25,7 +25,7 @@ const aiTools = [
     role: 'AI Code Editor',
     desc: 'Tab-completion and inline edits inside the editor. Keeps me in flow without context switches.',
     icon: '▶',
-    color: 'green',
+    color: 'emerald',
     tag: 'EDITOR',
   },
   {
@@ -41,7 +41,7 @@ const aiTools = [
     role: 'Research & Ideation',
     desc: 'Quick lookups, brainstorming product ideas, summarizing docs, and exploring approaches fast.',
     icon: '◉',
-    color: 'purple',
+    color: 'violet',
     tag: 'RESEARCH',
   },
   {
@@ -49,54 +49,24 @@ const aiTools = [
     role: 'Inline Completions',
     desc: 'Real-time code suggestions directly in the editor. Great for boilerplate and repetitive patterns.',
     icon: '⬡',
-    color: 'green',
+    color: 'emerald',
     tag: 'ASSIST',
   },
 ];
 
 const workflow = [
-  {
-    step: '01',
-    label: 'Ideate',
-    detail: 'AI brainstorms product ideas, user stories, and architecture tradeoffs with me.',
-    color: 'cyan',
-    icon: '💡',
-  },
-  {
-    step: '02',
-    label: 'Architect',
-    detail: 'I design the system. AI validates the approach, flags blind spots, generates boilerplate.',
-    color: 'purple',
-    icon: '🏗',
-  },
-  {
-    step: '03',
-    label: 'Build',
-    detail: 'Agentic AI writes full feature implementations. I review, steer, and make final calls.',
-    color: 'green',
-    icon: '⚡',
-  },
-  {
-    step: '04',
-    label: 'Review',
-    detail: 'AI code-reviews my own code — catches bugs, security issues, and perf bottlenecks.',
-    color: 'cyan',
-    icon: '🔍',
-  },
-  {
-    step: '05',
-    label: 'Ship',
-    detail: 'What used to take a week ships in a day. Clients get more, faster, without quality loss.',
-    color: 'purple',
-    icon: '🚀',
-  },
+  { step: '01', label: 'Ideate',    detail: 'AI brainstorms product ideas, user stories, and architecture tradeoffs with me.',           color: 'cyan',    icon: '💡' },
+  { step: '02', label: 'Architect', detail: 'I design the system. AI validates the approach, flags blind spots, generates boilerplate.',  color: 'violet',  icon: '🏗' },
+  { step: '03', label: 'Build',     detail: 'Agentic AI writes full feature implementations. I review, steer, and make final calls.',     color: 'emerald', icon: '⚡' },
+  { step: '04', label: 'Review',    detail: 'AI code-reviews my own code — catches bugs, security issues, and perf bottlenecks.',         color: 'cyan',    icon: '🔍' },
+  { step: '05', label: 'Ship',      detail: 'What used to take a week ships in a day. Clients get more, faster, without quality loss.',   color: 'violet',  icon: '🚀' },
 ];
 
 const speedStats = [
-  { label: 'Faster Delivery', value: '5×', sub: 'vs traditional dev', color: 'cyan' },
-  { label: 'Code Quality', value: '↑', sub: 'AI reviews every PR', color: 'green' },
-  { label: 'Bugs Caught', value: '~80%', sub: 'before they ship', color: 'purple' },
-  { label: 'Ideas → MVP', value: '<48h', sub: 'for most projects', color: 'cyan' },
+  { label: 'Faster Delivery', value: '5×',    sub: 'vs traditional dev',  color: 'cyan'    },
+  { label: 'Code Quality',    value: '↑',     sub: 'AI reviews every PR', color: 'emerald' },
+  { label: 'Bugs Caught',     value: '~80%',  sub: 'before they ship',    color: 'violet'  },
+  { label: 'Ideas → MVP',     value: '<48h',  sub: 'for most projects',   color: 'cyan'    },
 ];
 
 const colorMap: Record<string, { text: string; border: string; badge: string; glow: string; dot: string }> = {
@@ -104,22 +74,22 @@ const colorMap: Record<string, { text: string; border: string; badge: string; gl
     text: 'text-cyan-400',
     border: 'border-cyan-400/30',
     badge: 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/30',
-    glow: 'hover:shadow-[0_0_25px_rgba(0,245,255,0.15)] hover:border-cyan-400/60',
-    dot: 'bg-cyan-400 shadow-[0_0_8px_rgba(0,245,255,0.8)]',
+    glow: 'hover:shadow-[0_0_25px_rgba(34,211,238,0.12)] hover:border-cyan-400/60',
+    dot: 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]',
   },
-  purple: {
-    text: 'text-purple-400',
-    border: 'border-purple-400/30',
-    badge: 'bg-purple-400/10 text-purple-400 border border-purple-400/30',
-    glow: 'hover:shadow-[0_0_25px_rgba(123,47,255,0.15)] hover:border-purple-400/60',
-    dot: 'bg-purple-400 shadow-[0_0_8px_rgba(123,47,255,0.8)]',
+  violet: {
+    text: 'text-violet-400',
+    border: 'border-violet-400/30',
+    badge: 'bg-violet-400/10 text-violet-400 border border-violet-400/30',
+    glow: 'hover:shadow-[0_0_25px_rgba(167,139,250,0.12)] hover:border-violet-400/60',
+    dot: 'bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.8)]',
   },
-  green: {
-    text: 'text-green-400',
-    border: 'border-green-400/30',
-    badge: 'bg-green-400/10 text-green-400 border border-green-400/30',
-    glow: 'hover:shadow-[0_0_25px_rgba(0,255,136,0.15)] hover:border-green-400/60',
-    dot: 'bg-green-400 shadow-[0_0_8px_rgba(0,255,136,0.8)]',
+  emerald: {
+    text: 'text-emerald-400',
+    border: 'border-emerald-400/30',
+    badge: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30',
+    glow: 'hover:shadow-[0_0_25px_rgba(52,211,153,0.12)] hover:border-emerald-400/60',
+    dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]',
   },
 };
 
@@ -141,7 +111,13 @@ function ToolCard({ tool, index }: { tool: typeof aiTools[0]; index: number }) {
       <motion.div
         className={`absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
         style={{
-          background: `radial-gradient(circle at top left, ${tool.color === 'cyan' ? 'rgba(0,245,255,0.06)' : tool.color === 'purple' ? 'rgba(123,47,255,0.06)' : 'rgba(0,255,136,0.06)'} 0%, transparent 60%)`,
+          background: `radial-gradient(circle at top left, ${
+            tool.color === 'cyan'
+              ? 'rgba(34,211,238,0.06)'
+              : tool.color === 'violet'
+              ? 'rgba(167,139,250,0.06)'
+              : 'rgba(52,211,153,0.06)'
+          } 0%, transparent 60%)`,
         }}
       />
 
@@ -186,7 +162,7 @@ export default function AIWorkflow() {
 
       {/* Glowing background orbs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-10 w-80 h-80 bg-purple-500 rounded-full opacity-[0.04] blur-[100px]" />
+        <div className="absolute top-1/3 left-10 w-80 h-80 bg-violet-500 rounded-full opacity-[0.04] blur-[100px]" />
         <div className="absolute bottom-1/3 right-10 w-80 h-80 bg-cyan-400 rounded-full opacity-[0.04] blur-[100px]" />
       </div>
 
@@ -200,23 +176,23 @@ export default function AIWorkflow() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 glass-effect border border-purple-400/30 text-xs font-mono">
-            <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(123,47,255,0.8)]" />
-            <span className="text-purple-400 tracking-widest">AI-AUGMENTED WORKFLOW</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 glass-effect border border-violet-400/30 text-xs font-mono">
+            <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse shadow-[0_0_8px_rgba(167,139,250,0.8)]" />
+            <span className="text-violet-400 tracking-widest">AI-AUGMENTED WORKFLOW</span>
           </div>
 
           <p className="font-mono text-cyan-400 text-sm tracking-widest mb-3 opacity-70">
             &gt; ps aux | grep ai_tools
           </p>
           <h2 className="text-4xl sm:text-5xl font-bold mb-4">
-            I Build With <span className="text-purple-400">AI</span>
+            I Build With <span className="text-violet-400">AI</span>
           </h2>
-          <div className="h-0.5 w-24 mx-auto bg-gradient-to-r from-purple-500 to-cyan-400" />
+          <div className="h-0.5 w-24 mx-auto bg-gradient-to-r from-violet-400 to-cyan-400" />
           <p className="text-gray-400 mt-6 mb-2 max-w-2xl mx-auto leading-relaxed">
             AI isn&apos;t a crutch — it&apos;s a <span className="text-cyan-400 font-semibold">force multiplier</span>.
             I leverage AI at every stage of the dev cycle to deliver more, faster, and with higher quality.
             The result: clients get{' '}
-            <span className="text-purple-400 font-semibold">enterprise-grade output</span> at freelancer speed.
+            <span className="text-violet-400 font-semibold">enterprise-grade output</span> at freelancer speed.
           </p>
         </motion.div>
 
@@ -253,7 +229,7 @@ export default function AIWorkflow() {
 
           <div className="relative">
             {/* Connecting line */}
-            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-px bg-gradient-to-r from-cyan-400/20 via-purple-500/40 to-cyan-400/20" />
+            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-px bg-gradient-to-r from-cyan-400/20 via-violet-400/40 to-cyan-400/20" />
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
               {workflow.map((step, i) => {

@@ -1,7 +1,6 @@
 'use client';
 import { useState, useRef, MouseEvent } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 
 const projects = [
   {
@@ -21,7 +20,7 @@ const projects = [
     category: 'Open Source Tool',
     desc: 'A blazing-fast embedded key-value store written in C. Zero dependencies, single header, 10M+ read ops/second. Used in production systems worldwide.',
     tags: ['C', 'SQL', 'Git'],
-    color: 'yellow',
+    color: 'amber',
     status: 'OPEN SOURCE',
     stats: { stars: '1.2K', speed: '10M ops/s', size: '<50KB' },
     icon: '⚡',
@@ -32,7 +31,7 @@ const projects = [
     category: 'Freelance Product',
     desc: 'Headless CMS with real-time collaboration, version history, and a query builder. Built with React and Supabase.',
     tags: ['React', 'Supabase', 'TypeScript'],
-    color: 'purple',
+    color: 'violet',
     status: 'LIVE',
     stats: { clients: '5 clients', storage: 'Unlimited', sync: 'Real-time' },
     icon: '📝',
@@ -43,7 +42,7 @@ const projects = [
     category: 'API Service',
     desc: 'API monitoring service. Live dashboards, alert webhooks, and uptime tracking, packed into a lightweight container.',
     tags: ['JS', 'SQL', 'Docker'],
-    color: 'green',
+    color: 'emerald',
     status: 'BETA',
     stats: { endpoints: '∞ monitors', alerts: 'Instant', logs: '90 days' },
     icon: '📡',
@@ -65,7 +64,7 @@ const projects = [
     category: 'CLI Tool',
     desc: 'High-speed network scanner and packet analyzer written in C. Multithreaded scanning at line speed.',
     tags: ['C', 'Git', 'Docker'],
-    color: 'purple',
+    color: 'violet',
     status: 'OPEN SOURCE',
     stats: { speed: 'Line-rate', threads: 'Multi-threaded', protos: '10+ protocols' },
     icon: '🔍',
@@ -79,35 +78,35 @@ const colorConfig: Record<string, {
     text: 'text-cyan-400',
     border: 'border-cyan-400/30',
     badge: 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/30',
-    glow: 'group-hover:shadow-[0_0_30px_rgba(0,245,255,0.15)]',
+    glow: 'group-hover:shadow-[0_0_30px_rgba(34,211,238,0.12)]',
     gradient: 'from-cyan-400/10',
   },
-  purple: {
-    text: 'text-purple-400',
-    border: 'border-purple-400/30',
-    badge: 'bg-purple-400/10 text-purple-400 border border-purple-400/30',
-    glow: 'group-hover:shadow-[0_0_30px_rgba(123,47,255,0.15)]',
-    gradient: 'from-purple-400/10',
+  violet: {
+    text: 'text-violet-400',
+    border: 'border-violet-400/30',
+    badge: 'bg-violet-400/10 text-violet-400 border border-violet-400/30',
+    glow: 'group-hover:shadow-[0_0_30px_rgba(167,139,250,0.12)]',
+    gradient: 'from-violet-400/10',
   },
-  green: {
-    text: 'text-green-400',
-    border: 'border-green-400/30',
-    badge: 'bg-green-400/10 text-green-400 border border-green-400/30',
-    glow: 'group-hover:shadow-[0_0_30px_rgba(0,255,136,0.15)]',
-    gradient: 'from-green-400/10',
+  emerald: {
+    text: 'text-emerald-400',
+    border: 'border-emerald-400/30',
+    badge: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30',
+    glow: 'group-hover:shadow-[0_0_30px_rgba(52,211,153,0.12)]',
+    gradient: 'from-emerald-400/10',
   },
-  yellow: {
-    text: 'text-yellow-400',
-    border: 'border-yellow-400/30',
-    badge: 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/30',
-    glow: 'group-hover:shadow-[0_0_30px_rgba(255,220,0,0.15)]',
-    gradient: 'from-yellow-400/10',
+  amber: {
+    text: 'text-amber-400',
+    border: 'border-amber-400/30',
+    badge: 'bg-amber-400/10 text-amber-400 border border-amber-400/30',
+    glow: 'group-hover:shadow-[0_0_30px_rgba(251,191,36,0.12)]',
+    gradient: 'from-amber-400/10',
   },
 };
 
 const statusColors: Record<string, string> = {
-  LIVE: 'text-green-400 bg-green-400/10 border-green-400/30',
-  BETA: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/30',
+  LIVE:          'text-emerald-400 bg-emerald-400/10 border-emerald-400/30',
+  BETA:          'text-amber-400 bg-amber-400/10 border-amber-400/30',
   'OPEN SOURCE': 'text-cyan-400 bg-cyan-400/10 border-cyan-400/30',
 };
 
@@ -171,7 +170,9 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
               </div>
             </div>
             <span className={`font-mono text-xs px-2 py-1 border ${statusColors[project.status]} flex items-center gap-1`}>
-              {project.status === 'LIVE' && <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />}
+              {project.status === 'LIVE' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              )}
               {project.status}
             </span>
           </div>
@@ -211,10 +212,13 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
 }
 
 export default function Projects() {
-  const router = useRouter();
+  const scrollToContact = () => {
+    const el = document.getElementById('contact');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
   return (
     <section id="projects" className="relative py-40 md:py-48 scroll-mt-24 overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-30" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-25" />
       <div className="absolute inset-0 grid-bg opacity-20" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -233,7 +237,7 @@ export default function Projects() {
           <h2 className="text-4xl sm:text-5xl font-bold">
             Products & <span className="text-cyan-400">Projects</span>
           </h2>
-          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-purple-500" />
+          <div className="h-0.5 w-24 mx-auto mt-4 bg-gradient-to-r from-cyan-400 to-violet-400" />
           <p className="text-gray-500 mt-6 text-sm max-w-xl mx-auto">
             Real products shipped to real customers. Each one is a lesson in craftsmanship.
           </p>
@@ -256,7 +260,7 @@ export default function Projects() {
         >
           <p className="text-gray-500 font-mono text-sm mb-4">// Want something custom built?</p>
           <button
-            onClick={() => router.push('/contact')}
+            onClick={scrollToContact}
             className="btn-primary px-8 py-3 text-sm font-semibold tracking-wide cursor-pointer"
           >
             Let&apos;s Build Together

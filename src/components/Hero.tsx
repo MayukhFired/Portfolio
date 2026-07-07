@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
 import ParticleCanvas from './ParticleCanvas';
 
 const roles = [
@@ -63,7 +62,7 @@ function GlitchText({ text }: { text: string }) {
             {text}
           </span>
           <span
-            className="absolute inset-0 text-purple-400 opacity-70"
+            className="absolute inset-0 text-violet-400 opacity-70"
             style={{ clipPath: 'inset(60% 0 10% 0)', transform: 'translate(4px, -2px)' }}
             aria-hidden
           >
@@ -77,10 +76,10 @@ function GlitchText({ text }: { text: string }) {
 
 export default function Hero() {
   const role = useTypewriter(roles);
-  const router = useRouter();
 
-  const handleNavigate = (path: string) => {
-    router.push(path);
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -94,7 +93,7 @@ export default function Hero() {
       {/* Radial glow blobs */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-400 rounded-full opacity-5 blur-[100px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500 rounded-full opacity-5 blur-[100px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500 rounded-full opacity-5 blur-[100px]" />
       </div>
 
       {/* Corner decorations */}
@@ -164,8 +163,8 @@ export default function Hero() {
         >
           Building high-performance applications with{' '}
           <span className="text-cyan-400">React</span>,{' '}
-          <span className="text-purple-400">TypeScript</span>,{' '}
-          <span className="text-green-400">Supabase</span> and{' '}
+          <span className="text-violet-400">TypeScript</span>,{' '}
+          <span className="text-emerald-400">Supabase</span> and{' '}
           <span className="text-yellow-400">C</span>.
           I craft products that feel alive — fast, beautiful, and built to scale.
         </motion.p>
@@ -178,7 +177,7 @@ export default function Hero() {
           className="flex items-center justify-center gap-5 flex-wrap mt-8"
         >
           <motion.button
-            onClick={() => handleNavigate('/projects')}
+            onClick={() => scrollTo('projects')}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
             className="btn-primary px-8 py-3 text-sm font-semibold tracking-wide cursor-pointer"
@@ -186,10 +185,10 @@ export default function Hero() {
             View Products
           </motion.button>
           <motion.button
-            onClick={() => handleNavigate('/contact')}
+            onClick={() => scrollTo('contact')}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.97 }}
-            className="px-8 py-3 text-sm font-semibold tracking-wide border-2 border-purple-500 text-purple-400 transition-all duration-300 hover:bg-purple-500/10 hover:shadow-[0_0_20px_rgba(123,47,255,0.4)] cursor-pointer"
+            className="px-8 py-3 text-sm font-semibold tracking-wide border-2 border-violet-400 text-violet-400 transition-all duration-300 hover:bg-violet-400/10 hover:shadow-[0_0_20px_rgba(167,139,250,0.3)] cursor-pointer"
           >
             Contact Me
           </motion.button>
@@ -203,14 +202,14 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.95 }}
         >
           <button
-            onClick={() => handleNavigate('/ai-workflow')}
-            className="group inline-flex items-center gap-2 px-3 py-1.5 glass-effect border border-purple-400/30 hover:border-purple-400/70 transition-all duration-300 hover:shadow-[0_0_16px_rgba(123,47,255,0.25)] cursor-pointer"
+            onClick={() => scrollTo('ai-workflow')}
+            className="group inline-flex items-center gap-2 px-3 py-1.5 glass-effect border border-violet-400/30 hover:border-violet-400/70 transition-all duration-300 hover:shadow-[0_0_16px_rgba(167,139,250,0.2)] cursor-pointer"
           >
             <span className="text-xs">🤖</span>
-            <span className="font-mono text-[11px] text-purple-400 tracking-wider">
+            <span className="font-mono text-[11px] text-violet-400 tracking-wider">
               AI-POWERED DEVELOPMENT
             </span>
-            <span className="font-mono text-[11px] text-gray-600 group-hover:text-purple-400 transition-colors">
+            <span className="font-mono text-[11px] text-gray-600 group-hover:text-violet-400 transition-colors">
               →
             </span>
           </button>
@@ -223,9 +222,9 @@ export default function Hero() {
           transition={{ duration: 1, delay: 1.2 }}
           className="font-mono text-[11px] text-gray-700 mt-6"
         >
-          <span className="text-purple-600">❯</span>
+          <span className="text-violet-600">❯</span>
           <span className="text-cyan-800"> npm run build</span>
-          <span className="text-green-700"> — compiled successfully in 342ms</span>
+          <span className="text-emerald-700"> — compiled successfully in 342ms</span>
         </motion.div>
       </div>
 

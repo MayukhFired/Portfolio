@@ -1,6 +1,2 @@
-'use client';
-import Contact from '@/components/Contact';
-
-export default function ContactPage() {
-  return <Contact />;
-}
+import { redirect } from 'next/navigation';
+export default function ContactPage() { redirect('/'); }
