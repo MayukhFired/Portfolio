@@ -248,7 +248,10 @@ const DotField = memo(({
       engagement.current += (targetEngagement - engagement.current) * 0.06;
       if (engagement.current < 0.001) engagement.current = 0;
 
-      const shouldAnimate = engagement.current > 0.005 || (propsRef.current.waveAmplitude ?? 0) > 0 || propsRef.current.sparkle;
+      const shouldAnimate =
+        engagement.current > 0.005 ||
+        (propsRef.current.waveAmplitude ?? 0) > 0 ||
+        !!propsRef.current.sparkle;
       drawFrame(shouldAnimate);
     }
 

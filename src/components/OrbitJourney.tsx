@@ -192,6 +192,13 @@ const defaultLines = [
   '  my journey →',
 ];
 
+const REVEAL_TIMING = {
+  firstNodeDelay: 0.3,
+  stepDelay: 0.46,
+  segmentLead: 0.18,
+  segmentDuration: 0.22,
+};
+
 /* ══════════════════════════════════════════
    TERMINAL DISPLAY
 ══════════════════════════════════════════ */
@@ -272,13 +279,17 @@ export function TerminalDisplay({ activeNode, colorHex }: TerminalProps) {
 interface MonitorProps {
   activeNode: JourneyNode | null;
   powered: boolean;
+  width?: number;
 }
 
-export function CRTMonitor({ activeNode, powered }: MonitorProps) {
+export function CRTMonitor({ activeNode, powered, width = 440 }: MonitorProps) {
   const accent = activeNode?.colorHex ?? '#22d3ee';
+  const scale = width / 440;
+  const screenHeight = 330 * scale;
+  const terminalHeight = 278 * scale;
 
   return (
-    <div className="relative flex flex-col items-center select-none" style={{ width: 440 }}>
+    <div className="relative flex flex-col items-center select-none" style={{ width }}>
       {/* Outer bezel */}
       <div
         className="relative rounded-2xl p-[10px] w-full"
@@ -291,7 +302,7 @@ export function CRTMonitor({ activeNode, powered }: MonitorProps) {
       >
         {/* Screen */}
         <div className="rounded-xl overflow-hidden" style={{ background: '#000', boxShadow: 'inset 0 0 24px rgba(0,0,0,0.9)' }}>
-          <div className="relative" style={{ height: 330 }}>
+          <div className="relative" style={{ height: screenHeight }}>
 
             {/* Power-on flash */}
             {powered && (
@@ -360,7 +371,7 @@ export function CRTMonitor({ activeNode, powered }: MonitorProps) {
             </div>
 
             {/* Terminal */}
-            <div className="relative z-20" style={{ height: 278 }}>
+            <div className="relative z-20" style={{ height: terminalHeight }}>
               {powered
                 ? <TerminalDisplay activeNode={activeNode} colorHex={accent} />
                 : <div className="w-full h-full flex items-center justify-center font-mono text-xs" style={{ color: '#1a1a2e' }}>█</div>
@@ -404,19 +415,19 @@ interface NodeProps {
   y: number;
   isActive: boolean;
   onActivate: (node: JourneyNode | null) => void;
-  delay: number;
-  inView: boolean;
+  revealAt: number;
+  isRevealed: boolean;
 }
 
-export function OrbitNode({ node, x, y, isActive, onActivate, delay, inView }: NodeProps) {
+export function OrbitNode({ node, x, y, isActive, onActivate, revealAt, isRevealed }: NodeProps) {
   const R = 28; // node radius
   const imgSize = 30; // logo image size
 
   return (
     <motion.g
       initial={{ opacity: 0, scale: 0 }}
-      animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
-      transition={{ duration: 0.4, delay, type: 'spring', stiffness: 200, damping: 15 }}
+      animate={isRevealed ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }}
+      transition={{ duration: 0.38, delay: revealAt, type: 'spring', stiffness: 220, damping: 16 }}
     >
       {/* Pulse ring */}
       {isActive && (
@@ -439,8 +450,9 @@ export function OrbitNode({ node, x, y, isActive, onActivate, delay, inView }: N
         strokeWidth={isActive ? 2.5 : 1.5}
         style={{
           filter: isActive ? `drop-shadow(0 0 12px ${node.colorHex})` : `drop-shadow(0 0 4px ${node.colorHex}44)`,
-          cursor: 'pointer',
+          cursor: isRevealed ? 'pointer' : 'default',
           transition: 'all 0.3s ease',
+          pointerEvents: isRevealed ? 'auto' : 'none',
         }}
         onMouseEnter={() => onActivate(node)}
         onMouseLeave={() => onActivate(null)}
@@ -502,6 +514,7 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
   // SVG canvas
   const W = 960;
   const H = 560;
+  const monitorWidth = 500;
   const cx = W / 2;
   const cy = H / 2;
   const rx = 400;
@@ -515,6 +528,15 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
     const angle = startAngle + i * angleStep;
     const pt = ellipsePoint(cx, cy, rx, ry, angle);
     return { node, ...pt, angle };
+  });
+
+  const segmentPaths = nodePositions.slice(1).map(({ node, x, y }, index) => {
+    const prev = nodePositions[index];
+    return {
+      id: `segment-${node.id}`,
+      path: `M ${prev.x} ${prev.y} L ${x} ${y}`,
+      revealAt: REVEAL_TIMING.firstNodeDelay + index * REVEAL_TIMING.stepDelay + REVEAL_TIMING.segmentLead,
+    };
   });
 
   // SVG ellipse path string for the travelling dot
@@ -552,8 +574,8 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
           strokeWidth={1}
           strokeDasharray="6 4"
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-          transition={{ duration: 1.8, ease: 'easeInOut' }}
+          animate={inView ? { pathLength: 1, opacity: 0.32 } : { pathLength: 0, opacity: 0 }}
+          transition={{ duration: 2.1, ease: 'easeInOut', delay: REVEAL_TIMING.firstNodeDelay + 0.08 }}
         />
 
         {/* ── Travelling glow dot ── */}
@@ -571,21 +593,22 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
           </motion.circle>
         )}
 
-        {/* ── Connector lines from nodes to center ── */}
-        {nodePositions.map(({ node, x, y }) => {
-          const isActive = activeNode?.id === node.id;
+        {/* ── Progressive journey segments ── */}
+        {segmentPaths.map(({ id, path, revealAt }, index) => {
+          const segmentNode = nodePositions[index + 1]?.node;
+          const isActive = activeNode?.id === segmentNode?.id || activeNode?.id === nodePositions[index]?.node.id;
           return (
-            <motion.line
-              key={`line-${node.id}`}
-              x1={x} y1={y}
-              x2={cx} y2={cy}
-              stroke={isActive ? node.colorHex : 'rgba(255,255,255,0.04)'}
-              strokeWidth={isActive ? 1.5 : 0.5}
-              strokeDasharray={isActive ? '4 3' : '2 6'}
-              style={{ transition: 'stroke 0.4s ease, stroke-width 0.4s ease' }}
-              initial={{ opacity: 0 }}
-              animate={inView ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ delay: 0.8 }}
+            <motion.path
+              key={id}
+              d={path}
+              fill="none"
+              stroke={isActive && segmentNode ? `${segmentNode.colorHex}bb` : 'rgba(255,255,255,0.14)'}
+              strokeWidth={isActive ? 1.5 : 1}
+              strokeDasharray={isActive ? '4 4' : '3 5'}
+              style={{ transition: 'stroke 0.35s ease, stroke-width 0.35s ease' }}
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={inView ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+              transition={{ duration: REVEAL_TIMING.segmentDuration, delay: revealAt, ease: 'easeOut' }}
             />
           );
         })}
@@ -599,8 +622,8 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
             y={y}
             isActive={activeNode?.id === node.id}
             onActivate={onActivate}
-            delay={0.4 + i * 0.1}
-            inView={inView}
+            revealAt={REVEAL_TIMING.firstNodeDelay + i * REVEAL_TIMING.stepDelay}
+            isRevealed={inView}
           />
         ))}
       </svg>
@@ -608,9 +631,9 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
       {/* ── Monitor sits in the center ── */}
       <div
         className="absolute"
-        style={{ left: cx - 220, top: cy - 190 }}
+        style={{ left: cx - monitorWidth / 2, top: cy - 205 }}
       >
-        <CRTMonitor activeNode={activeNode} powered={inView} />
+        <CRTMonitor activeNode={activeNode} powered={inView} width={monitorWidth} />
       </div>
     </div>
   );
@@ -761,6 +784,15 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
     return { node, x, y };
   });
 
+  const segmentPaths = nodePositions.slice(1).map(({ node, x, y }, index) => {
+    const prev = nodePositions[index];
+    return {
+      id: `msegment-${node.id}`,
+      path: `M ${prev.x} ${prev.y} L ${x} ${y}`,
+      revealAt: REVEAL_TIMING.firstNodeDelay + index * REVEAL_TIMING.stepDelay + REVEAL_TIMING.segmentLead,
+    };
+  });
+
   // Arc path for the left semi-ellipse
   const topPt = nodePositions[0];
   const botPt = nodePositions[nodePositions.length - 1];
@@ -791,8 +823,8 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
           strokeWidth={1}
           strokeDasharray="5 4"
           initial={{ pathLength: 0, opacity: 0 }}
-          animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-          transition={{ duration: 1.4, ease: 'easeInOut' }}
+          animate={inView ? { pathLength: 1, opacity: 0.28 } : { pathLength: 0, opacity: 0 }}
+          transition={{ duration: 1.6, ease: 'easeInOut', delay: REVEAL_TIMING.firstNodeDelay + 0.08 }}
         />
 
         {/* Travelling dot on arc */}
@@ -802,21 +834,22 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
           </motion.circle>
         )}
 
-        {/* Connector lines */}
-        {nodePositions.map(({ node, x, y }) => {
-          const isActive = activeNode?.id === node.id;
+        {/* Progressive journey segments */}
+        {segmentPaths.map(({ id, path, revealAt }, index) => {
+          const segmentNode = nodePositions[index + 1]?.node;
+          const isActive = activeNode?.id === segmentNode?.id || activeNode?.id === nodePositions[index]?.node.id;
           return (
-            <motion.line
-              key={`mline-${node.id}`}
-              x1={x} y1={y}
-              x2={phoneX - 70} y2={phoneY}
-              stroke={isActive ? node.colorHex : 'rgba(255,255,255,0.04)'}
-              strokeWidth={isActive ? 1.5 : 0.5}
-              strokeDasharray={isActive ? '3 3' : '2 5'}
-              style={{ transition: 'all 0.3s ease' }}
-              initial={{ opacity: 0 }}
-              animate={inView ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ delay: 0.8 }}
+            <motion.path
+              key={id}
+              d={path}
+              fill="none"
+              stroke={isActive && segmentNode ? `${segmentNode.colorHex}bb` : 'rgba(255,255,255,0.14)'}
+              strokeWidth={isActive ? 1.5 : 1}
+              strokeDasharray={isActive ? '3 3' : '3 5'}
+              style={{ transition: 'stroke 0.35s ease, stroke-width 0.35s ease' }}
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={inView ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+              transition={{ duration: REVEAL_TIMING.segmentDuration, delay: revealAt, ease: 'easeOut' }}
             />
           );
         })}
@@ -830,8 +863,8 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
             y={y}
             isActive={activeNode?.id === node.id}
             onActivate={onActivate}
-            delay={0.3 + i * 0.08}
-            inView={inView}
+            revealAt={REVEAL_TIMING.firstNodeDelay + i * REVEAL_TIMING.stepDelay}
+            isRevealed={inView}
           />
         ))}
       </svg>
