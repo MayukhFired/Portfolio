@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, MouseEvent } from 'react';
+import { useRef, MouseEvent } from 'react';
 import { motion } from 'framer-motion';
 
 const projects = [
@@ -112,8 +112,8 @@ const statusColors: Record<string, string> = {
 
 function ProjectCard({ project, index }: { project: typeof projects[0]; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [hovered, setHovered] = useState(false);
+  const frameRef = useRef<number | null>(null);
+  const hoveredRef = useRef(false);
   const c = colorConfig[project.color];
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
@@ -123,12 +123,28 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
     const centerY = rect.top + rect.height / 2;
     const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 8;
     const rotateX = -((e.clientY - centerY) / (rect.height / 2)) * 8;
-    setRotate({ x: rotateX, y: rotateY });
+
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+    }
+
+    frameRef.current = requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      cardRef.current.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      cardRef.current.style.transition = hoveredRef.current ? 'transform 0.1s ease' : 'transform 0.5s ease';
+    });
   };
 
   const resetRotate = () => {
-    setRotate({ x: 0, y: 0 });
-    setHovered(false);
+    hoveredRef.current = false;
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+    if (cardRef.current) {
+      cardRef.current.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      cardRef.current.style.transition = 'transform 0.5s ease';
+    }
   };
 
   return (
@@ -142,12 +158,15 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
-        onMouseEnter={() => setHovered(true)}
+        onMouseEnter={() => {
+          hoveredRef.current = true;
+        }}
         onMouseLeave={resetRotate}
         style={{
-          transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
+          transform: 'rotateX(0deg) rotateY(0deg)',
           transformStyle: 'preserve-3d',
-          transition: hovered ? 'transform 0.1s ease' : 'transform 0.5s ease',
+          transition: 'transform 0.5s ease',
+          willChange: 'transform',
         }}
         className={`group glass-effect border ${c.border} p-6 h-full relative overflow-hidden cursor-default transition-all duration-300 ${c.glow}`}
       >

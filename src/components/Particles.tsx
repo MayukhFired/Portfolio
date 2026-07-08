@@ -118,13 +118,32 @@ const Particles: FC<ParticlesProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const visibleRef = useRef(true);
+  const activeRef = useRef(true);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
+    const observer = new IntersectionObserver(
+      ([entry]) => { visibleRef.current = entry.isIntersecting; },
+      { rootMargin: '80px' }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    const resolvedPixelRatio = Math.min(pixelRatio, reduceMotion ? 1 : isTouch ? 1.1 : 1.5);
+    const resolvedParticleCount = Math.max(24, Math.floor(particleCount * (reduceMotion ? 0.35 : isTouch ? 0.55 : 1)));
+    const resolvedSpeed = reduceMotion ? Math.min(speed, 0.05) : speed;
+
     const renderer = new Renderer({
-      dpr: pixelRatio,
+      dpr: resolvedPixelRatio,
       depth: false,
       alpha: true
     });
@@ -144,18 +163,28 @@ const Particles: FC<ParticlesProps> = ({
     window.addEventListener('resize', resize, false);
     resize();
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
       mouseRef.current = { x, y };
     };
 
-    if (moveParticlesOnHover) {
-      window.addEventListener('mousemove', handleMouseMove);
+    const handlePointerLeave = () => {
+      mouseRef.current = { x: 0, y: 0 };
+    };
+
+    const handleVisibility = () => {
+      activeRef.current = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    if (moveParticlesOnHover && !isTouch && !reduceMotion) {
+      container.addEventListener('pointermove', handlePointerMove, { passive: true });
+      container.addEventListener('pointerleave', handlePointerLeave);
     }
 
-    const count = particleCount;
+    const count = resolvedParticleCount;
     const positions = new Float32Array(count * 3);
     const randoms = new Float32Array(count * 4);
     const colors = new Float32Array(count * 3);
@@ -204,13 +233,19 @@ const Particles: FC<ParticlesProps> = ({
 
     const update = (t: number) => {
       animationFrameId = requestAnimationFrame(update);
+
+      if (!visibleRef.current || !activeRef.current) {
+        lastTime = t;
+        return;
+      }
+
       const delta = t - lastTime;
       lastTime = t;
-      elapsed += delta * speed;
+      elapsed += delta * resolvedSpeed;
 
       program.uniforms.uTime.value = elapsed * 0.001;
 
-      if (moveParticlesOnHover) {
+      if (moveParticlesOnHover && !isTouch && !reduceMotion) {
         particles.position.x = -mouseRef.current.x * particleHoverFactor;
         particles.position.y = -mouseRef.current.y * particleHoverFactor;
       } else {
@@ -221,7 +256,7 @@ const Particles: FC<ParticlesProps> = ({
       if (!disableRotation) {
         particles.rotation.x = Math.sin(elapsed * 0.0002) * 0.1;
         particles.rotation.y = Math.cos(elapsed * 0.0005) * 0.15;
-        particles.rotation.z += 0.01 * speed;
+        particles.rotation.z += 0.01 * resolvedSpeed;
       }
 
       renderer.render({ scene: particles, camera });
@@ -231,10 +266,15 @@ const Particles: FC<ParticlesProps> = ({
 
     return () => {
       window.removeEventListener('resize', resize);
-      if (moveParticlesOnHover) {
-        window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (moveParticlesOnHover && !isTouch && !reduceMotion) {
+        container.removeEventListener('pointermove', handlePointerMove);
+        container.removeEventListener('pointerleave', handlePointerLeave);
       }
       cancelAnimationFrame(animationFrameId);
+      geometry.remove();
+      program.remove();
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
       if (container.contains(gl.canvas)) {
         container.removeChild(gl.canvas);
       }

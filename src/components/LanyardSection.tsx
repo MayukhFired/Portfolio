@@ -9,13 +9,14 @@ export default function LanyardSection() {
       {/* Interactive WebGL Particles Background */}
       <Particles
         particleColors={['#00f5ff', '#a855f7', '#22c55e']}
-        particleCount={80}
+        particleCount={60}
         particleSpread={10}
-        speed={0.12}
-        particleBaseSize={80}
+        speed={0.09}
+        particleBaseSize={68}
         moveParticlesOnHover={true}
         particleHoverFactor={1.2}
         alphaParticles={true}
+        pixelRatio={1}
         className="absolute inset-0 z-0 pointer-events-none opacity-40"
       />
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import CustomCursor from '@/components/CustomCursor';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -12,19 +12,15 @@ export default function ClientLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem('site-loaded') === 'true';
+  });
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isLoaded = sessionStorage.getItem('site-loaded');
-      if (isLoaded) setLoaded(true);
-    }
-  }, []);
-
-  const handleLoadComplete = () => {
-    sessionStorage.setItem('site-loaded', 'true');
+  const handleLoadComplete = useCallback(() => {
+    window.sessionStorage.setItem('site-loaded', 'true');
     setLoaded(true);
-  };
+  }, []);
 
   return (
     <>

@@ -10,6 +10,7 @@ export interface JourneyNode {
   id: string;
   label: string;
   icon: string;
+  logoUrl: string;
   color: string;
   colorHex: string;
   era: string;
@@ -21,6 +22,7 @@ export const journeyNodes: JourneyNode[] = [
     id: 'c',
     label: 'C',
     icon: 'C',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/c/c-original.svg',
     color: 'cyan',
     colorHex: '#22d3ee',
     era: 'Foundation',
@@ -43,6 +45,7 @@ export const journeyNodes: JourneyNode[] = [
     id: 'html',
     label: 'HTML/CSS',
     icon: '</>',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original.svg',
     color: 'amber',
     colorHex: '#fbbf24',
     era: 'Web Entry',
@@ -65,8 +68,9 @@ export const journeyNodes: JourneyNode[] = [
     id: 'js',
     label: 'JavaScript',
     icon: 'JS',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg',
     color: 'amber',
-    colorHex: '#fbbf24',
+    colorHex: '#f7df1e',
     era: 'Dynamic Web',
     lines: [
       '> ./journey --chapter=dynamic-web',
@@ -86,8 +90,9 @@ export const journeyNodes: JourneyNode[] = [
     id: 'react',
     label: 'React',
     icon: '⚛',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/react/react-original.svg',
     color: 'cyan',
-    colorHex: '#22d3ee',
+    colorHex: '#61dafb',
     era: 'Component Era',
     lines: [
       '> ./journey --chapter=components',
@@ -108,8 +113,9 @@ export const journeyNodes: JourneyNode[] = [
     id: 'ts',
     label: 'TypeScript',
     icon: 'TS',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/typescript/typescript-original.svg',
     color: 'violet',
-    colorHex: '#a78bfa',
+    colorHex: '#3178c6',
     era: 'Type Safety',
     lines: [
       '> ./journey --chapter=type-safety',
@@ -130,8 +136,9 @@ export const journeyNodes: JourneyNode[] = [
     id: 'supabase',
     label: 'Supabase',
     icon: '⚡',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/supabase/supabase-original.svg',
     color: 'emerald',
-    colorHex: '#34d399',
+    colorHex: '#3ecf8e',
     era: 'Full-Stack',
     lines: [
       '> ./journey --chapter=full-stack',
@@ -149,11 +156,12 @@ export const journeyNodes: JourneyNode[] = [
     ],
   },
   {
-    id: 'devops',
-    label: 'DevOps',
+    id: 'docker',
+    label: 'Docker',
     icon: '🐳',
+    logoUrl: 'https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg',
     color: 'violet',
-    colorHex: '#a78bfa',
+    colorHex: '#2496ed',
     era: 'Ship It',
     lines: [
       '> ./journey --chapter=ship-it',
@@ -270,7 +278,7 @@ export function CRTMonitor({ activeNode, powered }: MonitorProps) {
   const accent = activeNode?.colorHex ?? '#22d3ee';
 
   return (
-    <div className="relative flex flex-col items-center select-none" style={{ width: 320 }}>
+    <div className="relative flex flex-col items-center select-none" style={{ width: 440 }}>
       {/* Outer bezel */}
       <div
         className="relative rounded-2xl p-[10px] w-full"
@@ -283,7 +291,7 @@ export function CRTMonitor({ activeNode, powered }: MonitorProps) {
       >
         {/* Screen */}
         <div className="rounded-xl overflow-hidden" style={{ background: '#000', boxShadow: 'inset 0 0 24px rgba(0,0,0,0.9)' }}>
-          <div className="relative" style={{ height: 260 }}>
+          <div className="relative" style={{ height: 330 }}>
 
             {/* Power-on flash */}
             {powered && (
@@ -352,7 +360,7 @@ export function CRTMonitor({ activeNode, powered }: MonitorProps) {
             </div>
 
             {/* Terminal */}
-            <div className="relative z-20" style={{ height: 214 }}>
+            <div className="relative z-20" style={{ height: 278 }}>
               {powered
                 ? <TerminalDisplay activeNode={activeNode} colorHex={accent} />
                 : <div className="w-full h-full flex items-center justify-center font-mono text-xs" style={{ color: '#1a1a2e' }}>█</div>
@@ -401,6 +409,9 @@ interface NodeProps {
 }
 
 export function OrbitNode({ node, x, y, isActive, onActivate, delay, inView }: NodeProps) {
+  const R = 28; // node radius
+  const imgSize = 30; // logo image size
+
   return (
     <motion.g
       initial={{ opacity: 0, scale: 0 }}
@@ -410,50 +421,58 @@ export function OrbitNode({ node, x, y, isActive, onActivate, delay, inView }: N
       {/* Pulse ring */}
       {isActive && (
         <motion.circle
-          cx={x} cy={y} r={28}
+          cx={x} cy={y} r={R + 6}
           fill="none"
           stroke={node.colorHex}
           strokeWidth={1.5}
-          initial={{ r: 22, opacity: 0.8 }}
-          animate={{ r: 38, opacity: 0 }}
+          initial={{ r: R, opacity: 0.8 }}
+          animate={{ r: R + 18, opacity: 0 }}
           transition={{ duration: 1.2, repeat: Infinity }}
         />
       )}
 
-      {/* Outer glow circle */}
-      <motion.circle
-        cx={x} cy={y} r={22}
-        fill={isActive ? `${node.colorHex}22` : 'rgba(15,18,32,0.85)'}
+      {/* Background circle */}
+      <circle
+        cx={x} cy={y} r={R}
+        fill={isActive ? `${node.colorHex}22` : 'rgba(8,11,18,0.9)'}
         stroke={node.colorHex}
-        strokeWidth={isActive ? 2 : 1.5}
-        style={{ filter: isActive ? `drop-shadow(0 0 10px ${node.colorHex})` : 'none', cursor: 'pointer', transition: 'all 0.3s ease' }}
+        strokeWidth={isActive ? 2.5 : 1.5}
+        style={{
+          filter: isActive ? `drop-shadow(0 0 12px ${node.colorHex})` : `drop-shadow(0 0 4px ${node.colorHex}44)`,
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+        }}
         onMouseEnter={() => onActivate(node)}
         onMouseLeave={() => onActivate(null)}
         onClick={() => onActivate(isActive ? null : node)}
       />
 
-      {/* Icon text */}
-      <text
-        x={x} y={y + 1}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill={node.colorHex}
-        fontSize={node.icon.length > 2 ? 9 : 11}
-        fontFamily="JetBrains Mono, monospace"
-        fontWeight="bold"
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        {node.icon}
-      </text>
+      {/* Real logo via SVG <image> — clipped to circle */}
+      <defs>
+        <clipPath id={`clip-${node.id}`}>
+          <circle cx={x} cy={y} r={R - 6} />
+        </clipPath>
+      </defs>
+      <image
+        href={node.logoUrl}
+        x={x - imgSize / 2}
+        y={y - imgSize / 2}
+        width={imgSize}
+        height={imgSize}
+        clipPath={`url(#clip-${node.id})`}
+        style={{ pointerEvents: 'none', opacity: isActive ? 1 : 0.85, transition: 'opacity 0.3s ease' }}
+        preserveAspectRatio="xMidYMid meet"
+      />
 
-      {/* Label below node */}
+      {/* Label below */}
       <text
-        x={x} y={y + 34}
+        x={x} y={y + R + 14}
         textAnchor="middle"
         dominantBaseline="middle"
         fill={isActive ? node.colorHex : '#8892aa'}
-        fontSize={8}
+        fontSize={9}
         fontFamily="JetBrains Mono, monospace"
+        fontWeight={isActive ? 'bold' : 'normal'}
         style={{ pointerEvents: 'none', userSelect: 'none', transition: 'fill 0.3s ease' }}
       >
         {node.label}
@@ -481,12 +500,12 @@ interface DesktopOrbitProps {
 
 export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitProps) {
   // SVG canvas
-  const W = 720;
-  const H = 480;
+  const W = 960;
+  const H = 560;
   const cx = W / 2;
   const cy = H / 2;
-  const rx = 290;
-  const ry = 195;
+  const rx = 400;
+  const ry = 245;
 
   // Start at top (-90°) and go clockwise, 7 nodes evenly spaced
   const angleStep = 360 / journeyNodes.length;
@@ -589,7 +608,7 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
       {/* ── Monitor sits in the center ── */}
       <div
         className="absolute"
-        style={{ left: cx - 160, top: cy - 165 }}
+        style={{ left: cx - 220, top: cy - 190 }}
       >
         <CRTMonitor activeNode={activeNode} powered={inView} />
       </div>

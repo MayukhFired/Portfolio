@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 'use client';
+import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
@@ -49,19 +50,59 @@ export default function Lanyard({
   lanyardWidth = 1
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncViewport = () => setIsMobile(window.innerWidth < 768);
+    const syncMotion = () => setReducedMotion(motionQuery.matches);
+
+    syncViewport();
+    syncMotion();
+
+    const handleResize = () => syncViewport();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    motionQuery.addEventListener('change', syncMotion);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      motionQuery.removeEventListener('change', syncMotion);
+    };
+  }, []);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { rootMargin: '100px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div className="lanyard-wrapper">
+    <div ref={wrapperRef} className="lanyard-wrapper">
+      {reducedMotion ? (
+        <div className="flex h-full items-center justify-center">
+          <div className="relative rounded-[28px] border border-cyan-400/20 bg-white/[0.03] p-4 shadow-[0_0_40px_rgba(0,245,255,0.08)]">
+            <Image
+              src={frontImage || '/lanyard-profile.png'}
+              alt="Student identity card preview"
+              width={220}
+              height={320}
+              className="h-[320px] w-[220px] rounded-[22px] object-cover shadow-[0_18px_50px_rgba(0,0,0,0.45)]"
+            />
+          </div>
+        </div>
+      ) : (
       <Canvas
+        frameloop={isVisible ? 'always' : 'never'}
         camera={{ position: position, fov: fov }}
-        dpr={[1, isMobile ? 1.5 : 2]}
+        dpr={[1, isMobile ? 1.2 : 1.5]}
         gl={{ alpha: transparent }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
@@ -107,6 +148,7 @@ export default function Lanyard({
           />
         </Environment>
       </Canvas>
+      )}
     </div>
   );
 }
