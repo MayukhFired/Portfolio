@@ -29,11 +29,12 @@ interface BubbleCanvasProps {
 
 const MIN_RADIUS = 52;
 const MAX_RADIUS = 78;
-const DAMPING = 0.82;       // energy kept after wall bounce
-const FRICTION = 0.998;     // per-frame velocity decay
-const GRAVITY = 0.04;       // downward pull
-const SPAWN_SPREAD = 80;    // px from center to spawn
-const BUBBLE_PADDING = 2;   // gap between bubbles
+const WALL_DAMPING  = 0.95;   // energy kept on wall bounce (high = lively)
+const FRICTION      = 0.9995; // per-frame velocity decay (near 1 = barely slows)
+const MIN_SPEED     = 0.4;    // minimum speed — bubbles always keep moving
+const MAX_SPEED     = 3.2;    // cap so they don't fly too fast
+const SPAWN_SPREAD  = 80;     // px from center to spawn
+const BUBBLE_PADDING = 2;     // gap between bubbles
 
 export default function BubbleCanvas({ techs }: BubbleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -168,31 +169,45 @@ export default function BubbleCanvas({ techs }: BubbleCanvasProps) {
     for (let i = 0; i < bubbles.length; i++) {
       const b = bubbles[i];
 
-      // Gravity
-      b.vy += GRAVITY;
+      // No gravity — apply gentle friction only
+      b.vx *= FRICTION;
+      b.vy *= FRICTION;
+
+      // Enforce minimum speed so bubbles never stop floating
+      const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+      if (speed < MIN_SPEED) {
+        // nudge in current direction (or random if nearly stopped)
+        const angle = speed < 0.01
+          ? Math.random() * Math.PI * 2
+          : Math.atan2(b.vy, b.vx);
+        b.vx = Math.cos(angle) * MIN_SPEED;
+        b.vy = Math.sin(angle) * MIN_SPEED;
+      }
+
+      // Cap maximum speed
+      if (speed > MAX_SPEED) {
+        b.vx = (b.vx / speed) * MAX_SPEED;
+        b.vy = (b.vy / speed) * MAX_SPEED;
+      }
 
       // Move
       b.x += b.vx;
       b.y += b.vy;
 
-      // Friction
-      b.vx *= FRICTION;
-      b.vy *= FRICTION;
-
-      // Wall collisions
+      // Wall collisions — bounce with high energy retention
       if (b.x - b.radius < 0) {
         b.x = b.radius;
-        b.vx = Math.abs(b.vx) * DAMPING;
+        b.vx = Math.abs(b.vx) * WALL_DAMPING;
       } else if (b.x + b.radius > w) {
         b.x = w - b.radius;
-        b.vx = -Math.abs(b.vx) * DAMPING;
+        b.vx = -Math.abs(b.vx) * WALL_DAMPING;
       }
       if (b.y - b.radius < 0) {
         b.y = b.radius;
-        b.vy = Math.abs(b.vy) * DAMPING;
+        b.vy = Math.abs(b.vy) * WALL_DAMPING;
       } else if (b.y + b.radius > h) {
         b.y = h - b.radius;
-        b.vy = -Math.abs(b.vy) * DAMPING;
+        b.vy = -Math.abs(b.vy) * WALL_DAMPING;
       }
 
       // Bubble-to-bubble collisions
@@ -219,7 +234,7 @@ export default function BubbleCanvas({ techs }: BubbleCanvasProps) {
           const dvy = b.vy - b2.vy;
           const dot = dvx * nx + dvy * ny;
           if (dot > 0) {
-            const impulse = dot * DAMPING;
+            const impulse = dot * WALL_DAMPING;
             b.vx -= impulse * nx;
             b.vy -= impulse * ny;
             b2.vx += impulse * nx;
@@ -250,7 +265,7 @@ export default function BubbleCanvas({ techs }: BubbleCanvasProps) {
       // spawn near center with outward velocity
       const spawnX = cx + Math.cos(angle) * SPAWN_SPREAD * Math.random();
       const spawnY = cy + Math.sin(angle) * SPAWN_SPREAD * Math.random();
-      const speed = 4 + Math.random() * 6;
+      const speed = 5 + Math.random() * 4;
 
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -279,12 +294,16 @@ export default function BubbleCanvas({ techs }: BubbleCanvasProps) {
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const container = canvas.parentElement;
-    if (!container) return;
 
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    canvas.width = w;
+    // Walk up the DOM to find the <section> (or any ancestor with real size)
+    // The canvas sits inside: <section> > <motion.div absolute inset-0> > <canvas>
+    const section = canvas.closest('section') as HTMLElement | null;
+    const host = section ?? canvas.parentElement;
+    if (!host) return;
+
+    const w = host.clientWidth  || window.innerWidth;
+    const h = host.clientHeight || window.innerHeight;
+    canvas.width  = w;
     canvas.height = h;
     sizeRef.current = { w, h };
   }, []);
@@ -303,7 +322,9 @@ export default function BubbleCanvas({ techs }: BubbleCanvasProps) {
     const observer = new ResizeObserver(() => {
       handleResize();
     });
-    if (canvas.parentElement) observer.observe(canvas.parentElement);
+    const section = canvas.closest('section') as HTMLElement | null;
+    const observeTarget = section ?? canvas.parentElement;
+    if (observeTarget) observer.observe(observeTarget);
 
     return () => {
       cancelAnimationFrame(rafRef.current);

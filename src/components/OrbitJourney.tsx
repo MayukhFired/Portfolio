@@ -289,7 +289,7 @@ export function CRTMonitor({ activeNode, powered, width = 440 }: MonitorProps) {
   const terminalHeight = 278 * scale;
 
   return (
-    <div className="relative flex flex-col items-center select-none" style={{ width }}>
+    <div className="relative flex flex-col items-center select-none pointer-events-none" style={{ width }}>
       {/* Outer bezel */}
       <div
         className="relative rounded-2xl p-[10px] w-full"
@@ -417,9 +417,10 @@ interface NodeProps {
   onActivate: (node: JourneyNode | null) => void;
   revealAt: number;
   isRevealed: boolean;
+  isInteractive: boolean;
 }
 
-export function OrbitNode({ node, x, y, isActive, onActivate, revealAt, isRevealed }: NodeProps) {
+export function OrbitNode({ node, x, y, isActive, onActivate, revealAt, isRevealed, isInteractive }: NodeProps) {
   const R = 28; // node radius
   const imgSize = 30; // logo image size
 
@@ -450,9 +451,9 @@ export function OrbitNode({ node, x, y, isActive, onActivate, revealAt, isReveal
         strokeWidth={isActive ? 2.5 : 1.5}
         style={{
           filter: isActive ? `drop-shadow(0 0 12px ${node.colorHex})` : `drop-shadow(0 0 4px ${node.colorHex}44)`,
-          cursor: isRevealed ? 'pointer' : 'default',
+          cursor: isInteractive ? 'pointer' : 'default',
           transition: 'all 0.3s ease',
-          pointerEvents: isRevealed ? 'auto' : 'none',
+          pointerEvents: isInteractive ? 'auto' : 'none',
         }}
         onMouseEnter={() => onActivate(node)}
         onMouseLeave={() => onActivate(null)}
@@ -514,11 +515,12 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
   // SVG canvas
   const W = 960;
   const H = 560;
-  const monitorWidth = 500;
+  const monitorWidth = 470;
   const cx = W / 2;
   const cy = H / 2;
   const rx = 400;
   const ry = 245;
+  const [interactiveCount, setInteractiveCount] = useState(0);
 
   // Start at top (-90°) and go clockwise, 7 nodes evenly spaced
   const angleStep = 360 / journeyNodes.length;
@@ -539,8 +541,27 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
     };
   });
 
-  // SVG ellipse path string for the travelling dot
-  const ellipsePath = `M ${cx} ${cy - ry} A ${rx} ${ry} 0 1 1 ${cx - 0.001} ${cy - ry}`;
+  useEffect(() => {
+    if (!inView) {
+      setInteractiveCount(0);
+      return;
+    }
+
+    // Nodes animate in sequentially (via `revealAt` delays). We only enable
+    // pointer events after each node's delay has elapsed.
+    const timeouts: number[] = [];
+    for (let i = 0; i < journeyNodes.length; i++) {
+      const revealAt = REVEAL_TIMING.firstNodeDelay + i * REVEAL_TIMING.stepDelay;
+      const interactiveDelayMs = (revealAt + 0.18) * 1000; // buffer for spring settling
+      timeouts.push(
+        window.setTimeout(() => {
+          setInteractiveCount((prev) => Math.max(prev, i + 1));
+        }, interactiveDelayMs)
+      );
+    }
+
+    return () => timeouts.forEach((t) => window.clearTimeout(t));
+  }, [inView]);
 
   return (
     <div className="relative" style={{ width: W, height: H }}>
@@ -578,21 +599,6 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
           transition={{ duration: 2.1, ease: 'easeInOut', delay: REVEAL_TIMING.firstNodeDelay + 0.08 }}
         />
 
-        {/* ── Travelling glow dot ── */}
-        {inView && (
-          <motion.circle
-            r={4}
-            fill="#22d3ee"
-            style={{ filter: 'drop-shadow(0 0 6px #22d3ee)' }}
-          >
-            <animateMotion
-              dur="12s"
-              repeatCount="indefinite"
-              path={ellipsePath}
-            />
-          </motion.circle>
-        )}
-
         {/* ── Progressive journey segments ── */}
         {segmentPaths.map(({ id, path, revealAt }, index) => {
           const segmentNode = nodePositions[index + 1]?.node;
@@ -624,14 +630,15 @@ export function DesktopOrbit({ activeNode, onActivate, inView }: DesktopOrbitPro
             onActivate={onActivate}
             revealAt={REVEAL_TIMING.firstNodeDelay + i * REVEAL_TIMING.stepDelay}
             isRevealed={inView}
+          isInteractive={interactiveCount > i}
           />
         ))}
       </svg>
 
       {/* ── Monitor sits in the center ── */}
       <div
-        className="absolute"
-        style={{ left: cx - monitorWidth / 2, top: cy - 205 }}
+        className="absolute pointer-events-none"
+        style={{ left: cx - monitorWidth / 2, top: cy - 190 }}
       >
         <CRTMonitor activeNode={activeNode} powered={inView} width={monitorWidth} />
       </div>
@@ -783,6 +790,7 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
     const y = arcCy + arcRy * Math.sin(rad);
     return { node, x, y };
   });
+  const [interactiveCount, setInteractiveCount] = useState(0);
 
   const segmentPaths = nodePositions.slice(1).map(({ node, x, y }, index) => {
     const prev = nodePositions[index];
@@ -797,6 +805,25 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
   const topPt = nodePositions[0];
   const botPt = nodePositions[nodePositions.length - 1];
   const arcPath = `M ${topPt.x} ${topPt.y} A ${arcRx} ${arcRy} 0 0 0 ${botPt.x} ${botPt.y}`;
+
+  useEffect(() => {
+    if (!inView) {
+      setInteractiveCount(0);
+      return;
+    }
+
+    const timeouts: number[] = [];
+    for (let i = 0; i < journeyNodes.length; i++) {
+      const revealAt = REVEAL_TIMING.firstNodeDelay + i * REVEAL_TIMING.stepDelay;
+      const interactiveDelayMs = (revealAt + 0.18) * 1000;
+      timeouts.push(
+        window.setTimeout(() => {
+          setInteractiveCount((prev) => Math.max(prev, i + 1));
+        }, interactiveDelayMs)
+      );
+    }
+    return () => timeouts.forEach((t) => window.clearTimeout(t));
+  }, [inView]);
 
   return (
     <div className="relative" style={{ width: W, height: H }}>
@@ -865,6 +892,7 @@ export function MobileOrbit({ activeNode, onActivate, inView }: MobileOrbitProps
             onActivate={onActivate}
             revealAt={REVEAL_TIMING.firstNodeDelay + i * REVEAL_TIMING.stepDelay}
             isRevealed={inView}
+            isInteractive={interactiveCount > i}
           />
         ))}
       </svg>
