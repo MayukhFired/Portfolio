@@ -28,11 +28,11 @@ export default function LanyardSection() {
       <div className="max-w-7xl mx-auto px-6 sm:px-10 grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center relative z-10">
         {/* Left Column: 3D Lanyard Card */}
         <div className="h-[450px] sm:h-[550px] md:h-[650px] flex items-center justify-center relative order-2 md:order-1">
-          <Lanyard 
-            position={[0, 0, 16]} 
-            gravity={[0, -45, 0]} 
-            frontImage="/lanyard-profile.png"
-            backImage="/lanyard-profile.png"
+          <Lanyard
+            position={[0, 0, 16]}
+            gravity={[0, -45, 0]}
+            frontImage="/lanyard-profile-new.png"
+            backImage="/lanyard-profile-new.png"
             imageFit="cover"
           />
         </div>
@@ -76,7 +76,7 @@ export default function LanyardSection() {
             </div>
           </motion.div>
 
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

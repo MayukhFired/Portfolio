@@ -2,7 +2,7 @@
 'use client';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, extend, useFrame } from '@react-three/fiber';
+import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
@@ -186,18 +186,23 @@ function Band({
   const rot = useMemo(() => new THREE.Vector3(), []);
   const dir = useMemo(() => new THREE.Vector3(), []);
 
+  const { invalidate } = useThree();
+
   const segmentProps = { type: 'dynamic' as const, canSleep: true, colliders: false as const, angularDamping: 4, linearDamping: 4 };
   
   const { nodes, materials } = useGLTF('/card.glb') as any;
   const texture = useTexture(lanyardImage || '/lanyard.png') as THREE.Texture;
   const frontTex = useTexture(frontImage || BLANK_PIXEL) as THREE.Texture;
   const backTex = useTexture(backImage || BLANK_PIXEL) as THREE.Texture;
+  const baseMap = materials.base.map as THREE.Texture;
 
   const cardMap = useMemo(() => {
-    const baseMap = materials.base.map as THREE.Texture;
     if (!frontImage && !backImage) return baseMap;
 
-    const baseImg = baseMap.image as HTMLImageElement;
+    const baseImg = baseMap?.image as any;
+    // Texture images are populated async; guard until they exist so we don't "lock in" a blank composite.
+    if (!baseImg || typeof baseImg.width !== 'number' || typeof baseImg.height !== 'number') return baseMap;
+
     const W = baseImg.width;
     const H = baseImg.height;
     const canvas = document.createElement('canvas');
@@ -227,8 +232,15 @@ function Band({
       ctx.restore();
     };
 
-    if (frontImage && frontTex.image) drawFitted(frontTex.image as HTMLImageElement, FRONT_UV_RECT);
-    if (backImage && backTex.image) drawFitted(backTex.image as HTMLImageElement, BACK_UV_RECT);
+    const frontImg = frontTex.image as any;
+    const backImg = backTex.image as any;
+
+    if (frontImage && frontImg && typeof frontImg.width === 'number' && typeof frontImg.height === 'number') {
+      drawFitted(frontImg, FRONT_UV_RECT);
+    }
+    if (backImage && backImg && typeof backImg.width === 'number' && typeof backImg.height === 'number') {
+      drawFitted(backImg, BACK_UV_RECT);
+    }
 
     const composite = new THREE.CanvasTexture(canvas);
     composite.colorSpace = THREE.SRGBColorSpace;
@@ -236,7 +248,14 @@ function Band({
     composite.anisotropy = 16;
     composite.needsUpdate = true;
     return composite;
-  }, [frontImage, backImage, imageFit, frontTex, backTex, materials.base.map]);
+    // Note: `frontTex.image` / `backTex.image` change from undefined -> HTMLImageElement/ImageBitmap after load.
+    // Include them so the composite rebuilds once the photo is ready.
+  }, [baseMap, baseMap.image, frontImage, backImage, imageFit, frontTex.image, backTex.image]);
+
+  useEffect(() => {
+    // Ensure the scene re-renders once textures finish loading, even when frameloop is paused.
+    invalidate();
+  }, [invalidate, baseMap.image, frontTex.image, backTex.image, frontImage, backImage, imageFit]);
 
   const [curve] = useState(
     () =>
