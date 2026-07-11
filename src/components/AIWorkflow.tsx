@@ -1,186 +1,405 @@
 'use client';
-import { useState } from 'react';
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import CardSwap, { Card } from './CardSwap';
+import {
+  BulbIcon,
+  PenNotebookIcon,
+  MonitorCodeIcon,
+  MagnifierIcon,
+  RocketIcon,
+} from './workflow/WorkflowIcons';
 
-const aiTools = [
+// ─── Workflow steps data ──────────────────────────────────────────────────────
+const STEPS = [
   {
-    name: 'Kiro',
-    role: 'AI Dev Agent',
-    desc: 'Full agentic coding — architecture, implementation, debugging. My primary co-pilot for every project.',
-    icon: '◈',
-    color: 'cyan',
-    tag: 'PRIMARY',
+    id: 'ideate',
+    step: '01',
+    label: 'Ideate',
+    color: '#22d3ee',
+    side: 'left' as const,
+    detail:
+      'AI brainstorms product ideas, user stories, and architecture tradeoffs with me. Nothing starts without a clear problem statement.',
   },
   {
-    name: 'Claude',
-    role: 'Reasoning & Design',
-    desc: 'Deep reasoning on architecture decisions, code reviews, edge case analysis, and writing.',
-    icon: '◆',
-    color: 'violet',
-    tag: 'DAILY',
+    id: 'architect',
+    step: '02',
+    label: 'Architect',
+    color: '#a78bfa',
+    side: 'right' as const,
+    detail:
+      'I design the system. AI validates the approach, flags blind spots, generates boilerplate and scaffolding.',
   },
   {
-    name: 'Cursor',
-    role: 'AI Code Editor',
-    desc: 'Tab-completion and inline edits inside the editor. Keeps me in flow without context switches.',
-    icon: '▶',
-    color: 'emerald',
-    tag: 'EDITOR',
+    id: 'build',
+    step: '03',
+    label: 'Build',
+    color: '#34d399',
+    side: 'left' as const,
+    detail:
+      'Agentic AI writes full feature implementations. I review, steer, and make the final calls on every decision.',
   },
   {
-    name: 'v0 / Vercel',
-    role: 'UI Generation',
-    desc: 'Rapid UI prototyping. Generate component scaffolds, then refine and customize.',
-    icon: '▲',
-    color: 'cyan',
-    tag: 'UI',
+    id: 'review',
+    step: '04',
+    label: 'Review',
+    color: '#22d3ee',
+    side: 'right' as const,
+    detail:
+      'AI code-reviews my own code — catches bugs, security issues, and performance bottlenecks before they ship.',
   },
   {
-    name: 'ChatGPT',
-    role: 'Research & Ideation',
-    desc: 'Quick lookups, brainstorming product ideas, summarizing docs, and exploring approaches fast.',
-    icon: '◉',
-    color: 'violet',
-    tag: 'RESEARCH',
+    id: 'ship',
+    step: '05',
+    label: 'Ship',
+    color: '#a78bfa',
+    side: 'left' as const,
+    detail:
+      'What used to take a week ships in a day. Clients get more, faster, without any loss of quality.',
   },
-  {
-    name: 'GitHub Copilot',
-    role: 'Inline Completions',
-    desc: 'Real-time code suggestions directly in the editor. Great for boilerplate and repetitive patterns.',
-    icon: '⬡',
-    color: 'emerald',
-    tag: 'ASSIST',
-  },
-];
+] as const;
 
-const workflow = [
-  { step: '01', label: 'Ideate',    detail: 'AI brainstorms product ideas, user stories, and architecture tradeoffs with me.',           color: 'cyan',    icon: '💡' },
-  { step: '02', label: 'Architect', detail: 'I design the system. AI validates the approach, flags blind spots, generates boilerplate.',  color: 'violet',  icon: '🏗' },
-  { step: '03', label: 'Build',     detail: 'Agentic AI writes full feature implementations. I review, steer, and make final calls.',     color: 'emerald', icon: '⚡' },
-  { step: '04', label: 'Review',    detail: 'AI code-reviews my own code — catches bugs, security issues, and perf bottlenecks.',         color: 'cyan',    icon: '🔍' },
-  { step: '05', label: 'Ship',      detail: 'What used to take a week ships in a day. Clients get more, faster, without quality loss.',   color: 'violet',  icon: '🚀' },
-];
+// ─── Step icon dispatcher ─────────────────────────────────────────────────────
+function StepIcon({ id, active }: { id: string; active: boolean }) {
+  switch (id) {
+    case 'ideate':    return <BulbIcon        lit={active}    />;
+    case 'architect': return <PenNotebookIcon active={active} />;
+    case 'build':     return <MonitorCodeIcon active={active} />;
+    case 'review':    return <MagnifierIcon   active={active} />;
+    case 'ship':      return <RocketIcon      active={active} />;
+    default:          return null;
+  }
+}
 
-const speedStats = [
-  { label: 'Faster Delivery', value: '5×',    sub: 'vs traditional dev',  color: 'cyan'    },
-  { label: 'Code Quality',    value: '↑',     sub: 'AI reviews every PR', color: 'emerald' },
-  { label: 'Bugs Caught',     value: '~80%',  sub: 'before they ship',    color: 'violet'  },
-  { label: 'Ideas → MVP',     value: '<48h',  sub: 'for most projects',   color: 'cyan'    },
-];
+// ─── The zigzag wire SVG ──────────────────────────────────────────────────────
+// We render this absolutely behind the steps.
+// Node positions are passed in from the parent once layout is measured.
+interface WireProps {
+  nodes: { x: number; y: number }[];
+  progress: number; // 0-1, drives how far the light has travelled
+  color: string;
+}
 
-const colorMap: Record<string, { text: string; border: string; badge: string; glow: string; dot: string }> = {
-  cyan: {
-    text: 'text-cyan-400',
-    border: 'border-cyan-400/30',
-    badge: 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/30',
-    glow: 'hover:shadow-[0_0_25px_rgba(34,211,238,0.12)] hover:border-cyan-400/60',
-    dot: 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]',
-  },
-  violet: {
-    text: 'text-violet-400',
-    border: 'border-violet-400/30',
-    badge: 'bg-violet-400/10 text-violet-400 border border-violet-400/30',
-    glow: 'hover:shadow-[0_0_25px_rgba(167,139,250,0.12)] hover:border-violet-400/60',
-    dot: 'bg-violet-400 shadow-[0_0_8px_rgba(167,139,250,0.8)]',
-  },
-  emerald: {
-    text: 'text-emerald-400',
-    border: 'border-emerald-400/30',
-    badge: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30',
-    glow: 'hover:shadow-[0_0_25px_rgba(52,211,153,0.12)] hover:border-emerald-400/60',
-    dot: 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]',
-  },
-};
+function ZigzagWire({ nodes, progress, color }: WireProps) {
+  if (nodes.length < 2) return null;
 
-function ToolCard({ tool, index }: { tool: typeof aiTools[0]; index: number }) {
-  const [hovered, setHovered] = useState(false);
-  const c = colorMap[tool.color];
+  // Build a smooth path through all nodes using cubic bezier curves
+  let d = `M ${nodes[0].x} ${nodes[0].y}`;
+  for (let i = 1; i < nodes.length; i++) {
+    const prev = nodes[i - 1];
+    const curr = nodes[i];
+    const midY = (prev.y + curr.y) / 2;
+    d += ` C ${prev.x} ${midY}, ${curr.x} ${midY}, ${curr.x} ${curr.y}`;
+  }
+
+  // Measure total path length via a hidden SVG path element
+  const [pathLen, setPathLen] = useState(0);
+  const pathRef = useRef<SVGPathElement>(null);
+
+  useEffect(() => {
+    if (pathRef.current) {
+      setPathLen(pathRef.current.getTotalLength());
+    }
+  }, [nodes]);
+
+  const drawn = pathLen * progress;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className={`glass-effect border ${c.border} p-5 relative overflow-hidden group transition-all duration-300 ${c.glow} cursor-default`}
+    <svg
+      style={{
+        position: 'absolute',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+        overflow: 'visible',
+        zIndex: 0,
+      }}
     >
-      {/* Animated corner sweep on hover */}
-      <motion.div
-        className={`absolute top-0 left-0 w-full h-full opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-        style={{
-          background: `radial-gradient(circle at top left, ${
-            tool.color === 'cyan'
-              ? 'rgba(34,211,238,0.06)'
-              : tool.color === 'violet'
-              ? 'rgba(167,139,250,0.06)'
-              : 'rgba(52,211,153,0.06)'
-          } 0%, transparent 60%)`,
-        }}
-      />
+      <defs>
+        {/* Glowing filter for the lit wire */}
+        <filter id="wire-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 border ${c.border} flex items-center justify-center ${c.text} text-lg group-hover:scale-110 transition-transform duration-300`}>
-              {tool.icon}
-            </div>
-            <div>
-              <h4 className="font-bold text-white text-sm">{tool.name}</h4>
-              <p className={`font-mono text-xs ${c.text} opacity-70`}>{tool.role}</p>
-            </div>
-          </div>
-          <span className={`font-mono text-[10px] px-2 py-0.5 ${c.badge}`}>{tool.tag}</span>
-        </div>
-        <p className="text-gray-500 text-xs leading-relaxed">{tool.desc}</p>
-      </div>
+      {/* Dim unlit wire (full path, always visible) */}
+      <path d={d} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="2" strokeLinecap="round" />
 
-      {/* Pulse dot */}
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            className={`absolute bottom-3 right-3 w-1.5 h-1.5 rounded-full ${c.dot}`}
+      {/* Lit wire — grows with scroll */}
+      {pathLen > 0 && (
+        <>
+          {/* Glow layer */}
+          <path
+            d={d} fill="none"
+            stroke={color} strokeWidth="4" strokeLinecap="round"
+            strokeDasharray={`${drawn} ${pathLen}`}
+            opacity="0.35"
+            filter="url(#wire-glow)"
           />
-        )}
-      </AnimatePresence>
-    </motion.div>
+          {/* Sharp line layer */}
+          <path
+            d={d} fill="none"
+            stroke={color} strokeWidth="2" strokeLinecap="round"
+            strokeDasharray={`${drawn} ${pathLen}`}
+            opacity="0.9"
+          />
+          {/* Travelling bright tip */}
+          {progress > 0 && progress < 1 && pathRef.current && (
+            <TravellingTip path={pathRef.current} progress={progress} pathLen={pathLen} color={color} />
+          )}
+        </>
+      )}
+
+      {/* Hidden path to measure length */}
+      <path ref={pathRef} d={d} fill="none" stroke="none" />
+    </svg>
   );
 }
 
-export default function AIWorkflow() {
-  const { ref, inView } = useInView({ triggerOnce: true });
+function TravellingTip({
+  path, progress, pathLen, color,
+}: {
+  path: SVGPathElement;
+  progress: number;
+  pathLen: number;
+  color: string;
+}) {
+  const pt = path.getPointAtLength(pathLen * progress);
+  return (
+    <>
+      <circle cx={pt.x} cy={pt.y} r="7" fill={color} opacity="0.25" />
+      <circle cx={pt.x} cy={pt.y} r="4" fill={color} opacity="0.6" />
+      <circle cx={pt.x} cy={pt.y} r="2" fill="#ffffff"  opacity="0.95" />
+    </>
+  );
+}
+
+// ─── Individual step card ─────────────────────────────────────────────────────
+function StepCard({
+  step, index, active, nodeRef,
+}: {
+  step: typeof STEPS[number];
+  index: number;
+  active: boolean;
+  nodeRef: (el: HTMLDivElement | null) => void;
+}) {
+  const isLeft = step.side === 'left';
 
   return (
-    <section id="ai-workflow" className="relative py-40 md:py-48 scroll-mt-24 overflow-hidden">
-      {/* Top border beam */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-40" />
+    <div
+      className="relative flex w-full items-center"
+      style={{ justifyContent: isLeft ? 'flex-start' : 'flex-end', zIndex: 1 }}
+    >
+      {/* Text block — opposite side from icon */}
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ opacity: 0, x: isLeft ? 30 : -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.55, delay: 0.2 }}
+            className="absolute max-w-[220px]"
+            style={{ [isLeft ? 'right' : 'left']: '52%' }}
+          >
+            <p
+              className="font-mono text-[10px] tracking-widest mb-1"
+              style={{ color: step.color, opacity: 0.7 }}
+            >
+              STEP {step.step}
+            </p>
+            <h3 className="font-bold text-white text-lg mb-2">{step.label}</h3>
+            <p className="text-gray-500 text-xs leading-relaxed">{step.detail}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Glowing background orbs */}
+      {/* Icon node — this is the ref point for the wire */}
+      <motion.div
+        ref={nodeRef}
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.5, delay: index * 0.1, type: 'spring', stiffness: 180, damping: 20 }}
+        className="relative flex items-center justify-center rounded-2xl"
+        style={{
+          width: 110, height: 110,
+          background: active
+            ? `radial-gradient(circle, ${step.color}22 0%, rgba(8,11,20,0.9) 70%)`
+            : 'rgba(10,13,24,0.8)',
+          border: `1.5px solid ${active ? step.color + '60' : 'rgba(255,255,255,0.07)'}`,
+          boxShadow: active ? `0 0 30px ${step.color}30, inset 0 0 20px ${step.color}10` : 'none',
+          transition: 'all 0.5s ease',
+          zIndex: 2,
+        }}
+      >
+        <StepIcon id={step.id} active={active} />
+
+        {/* Step number badge */}
+        <span
+          className="absolute bottom-2 right-2 font-mono text-[9px] font-bold"
+          style={{ color: step.color, opacity: 0.6 }}
+        >
+          {step.step}
+        </span>
+
+        {/* Active pulse ring */}
+        {active && (
+          <motion.div
+            className="absolute inset-0 rounded-2xl"
+            style={{ border: `1px solid ${step.color}` }}
+            animate={{ opacity: [0.6, 0, 0.6], scale: [1, 1.08, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── AI Tools data ────────────────────────────────────────────────────────────
+const AI_TOOLS = [
+  {
+    name: 'Kiro',
+    role: 'AI Coding Agent',
+    tag: 'CODING',
+    color: '#22d3ee',
+    icon: '◈',
+    desc: 'My primary coding co-pilot. Writes full feature implementations, fixes bugs, and navigates the entire codebase autonomously.',
+  },
+  {
+    name: 'Google Antigravity',
+    role: 'Debugger',
+    tag: 'DEBUG',
+    color: '#f87171',
+    icon: '⬡',
+    desc: 'Tracks down hard-to-reproduce bugs and runtime errors fast. Makes debugging feel less like archaeology.',
+  },
+  {
+    name: 'Cursor',
+    role: 'IDE & File Handling',
+    tag: 'EDITOR',
+    color: '#34d399',
+    icon: '▶',
+    desc: 'The editor I live in. Handles file navigation, inline edits, and tab-completions without breaking my flow.',
+  },
+  {
+    name: 'Claude',
+    role: 'Reasoning & Logic',
+    tag: 'REASONING',
+    color: '#a78bfa',
+    icon: '◆',
+    desc: 'Goes deep where other models stop. Complex architectural decisions, multi-step logic, and edge-case analysis.',
+  },
+  {
+    name: 'Gemini',
+    role: 'Planning',
+    tag: 'PLANNING',
+    color: '#fbbf24',
+    icon: '◉',
+    desc: 'Maps out project timelines, breaks down features into tasks, and keeps the bigger picture in focus.',
+  },
+  {
+    name: 'Netlify',
+    role: 'Deployment',
+    tag: 'DEPLOY',
+    color: '#38bdf8',
+    icon: '▲',
+    desc: 'One push and it ships. Handles CI/CD, previews, and production deploys with zero configuration headaches.',
+  },
+];
+
+// ─── Main section ─────────────────────────────────────────────────────────────
+export default function AIWorkflow() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fire once when the pipeline comes into view
+  const { ref: pipelineRef, inView: pipelineInView } = useInView({
+    triggerOnce: true,
+    threshold: 0.15,
+  });
+
+  // Wire fill: 0 → 1 over DURATION ms, starts when section enters view
+  const DURATION = 3000; // ms — total wire travel time
+  const [wireFill, setWireFill] = useState(0);
+
+  useEffect(() => {
+    if (!pipelineInView) return;
+    const start = performance.now();
+    let raf: number;
+
+    function tick(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / DURATION, 1);
+      setWireFill(progress);
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    }
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [pipelineInView]);
+
+  // Which steps are "active" — light reaches step i when progress crosses its threshold
+  const activeSteps = STEPS.map((_, i) => wireFill >= i / (STEPS.length - 1) - 0.04);
+
+  // Measure node centre positions for the wire path
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [nodes, setNodes] = useState<{ x: number; y: number }[]>([]);
+
+  useEffect(() => {
+    function measure() {
+      if (!containerRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const pts = nodeRefs.current.map(el => {
+        if (!el) return { x: 0, y: 0 };
+        const r = el.getBoundingClientRect();
+        return {
+          x: r.left + r.width  / 2 - containerRect.left,
+          y: r.top  + r.height / 2 - containerRect.top,
+        };
+      });
+      setNodes(pts);
+    }
+
+    measure();
+    window.addEventListener('resize', measure);
+    const t = setTimeout(measure, 300);
+    return () => { window.removeEventListener('resize', measure); clearTimeout(t); };
+  }, []);
+
+  // Header in-view
+  const { ref: headerRef, inView: headerInView } = useInView({ triggerOnce: true, threshold: 0.2 });
+
+  return (
+    <section
+      id="ai-workflow"
+      className="relative py-32 md:py-40 scroll-mt-24 overflow-hidden"
+    >
+      {/* Background effects */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500 to-transparent opacity-40" />
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-10 w-80 h-80 bg-violet-500 rounded-full opacity-[0.04] blur-[100px]" />
-        <div className="absolute bottom-1/3 right-10 w-80 h-80 bg-cyan-400 rounded-full opacity-[0.04] blur-[100px]" />
+        <div className="absolute top-1/4 left-0  w-96 h-96 bg-violet-500 rounded-full opacity-[0.03] blur-[120px]" />
+        <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-cyan-400  rounded-full opacity-[0.03] blur-[120px]" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Section Header */}
+        {/* ── Header ──────────────────────────────────────────────── */}
         <motion.div
-          ref={ref}
+          ref={headerRef}
           initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
+          animate={headerInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="text-center mb-16"
+          className="text-center mb-24"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 glass-effect border border-violet-400/30 text-xs font-mono">
             <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse shadow-[0_0_8px_rgba(167,139,250,0.8)]" />
             <span className="text-violet-400 tracking-widest">AI-AUGMENTED WORKFLOW</span>
           </div>
-
           <p className="font-mono text-cyan-400 text-sm tracking-widest mb-3 opacity-70">
             &gt; ps aux | grep ai_tools
           </p>
@@ -188,114 +407,197 @@ export default function AIWorkflow() {
             I Build With <span className="text-violet-400">AI</span>
           </h2>
           <div className="h-0.5 w-24 mx-auto bg-gradient-to-r from-violet-400 to-cyan-400" />
-          <p className="text-gray-400 mt-6 mb-2 max-w-2xl mx-auto leading-relaxed">
-            AI isn&apos;t a crutch — it&apos;s a <span className="text-cyan-400 font-semibold">force multiplier</span>.
-            I leverage AI at every stage of the dev cycle to deliver more, faster, and with higher quality.
-            The result: clients get{' '}
-            <span className="text-violet-400 font-semibold">enterprise-grade output</span> at freelancer speed.
+          <p className="text-gray-400 mt-6 max-w-xl mx-auto text-sm leading-relaxed">
+            AI isn&apos;t a crutch — it&apos;s a{' '}
+            <span className="text-cyan-400 font-semibold">force multiplier</span>.
+            I leverage it at every stage to deliver more, faster, with higher quality.
           </p>
         </motion.div>
 
-        {/* Speed stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-20">
-          {speedStats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className={`glass-effect p-5 text-center border ${colorMap[stat.color].border} relative overflow-hidden group hover:scale-105 transition-transform duration-300`}
-            >
-              <div className={`text-3xl font-bold font-mono mb-1 ${colorMap[stat.color].text}`}>
-                {stat.value}
-              </div>
-              <div className="text-gray-300 text-sm font-medium">{stat.label}</div>
-              <div className="text-gray-600 text-xs mt-1 font-mono">{stat.sub}</div>
-            </motion.div>
-          ))}
-        </div>
+        {/* ── Zigzag workflow pipeline ─────────────────────────────── */}
+        <div
+          ref={(el) => {
+            // attach both refs
+            (containerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            pipelineRef(el);
+          }}
+          className="relative"
+          style={{ minHeight: STEPS.length * 180 }}
+        >
+          {/* SVG wire layer */}
+          <ZigzagWire nodes={nodes} progress={wireFill} color="#22d3ee" />
 
-        {/* Workflow pipeline */}
-        <div className="mb-28">
-          <motion.h3
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="font-mono text-xs text-gray-500 tracking-widest text-center mb-10"
-          >
-            /* HOW I WORK */
-          </motion.h3>
-
-          <div className="relative">
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-px bg-gradient-to-r from-cyan-400/20 via-violet-400/40 to-cyan-400/20" />
-
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-              {workflow.map((step, i) => {
-                const c = colorMap[step.color];
-                return (
-                  <motion.div
-                    key={step.step}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: i * 0.12 }}
-                    className="flex flex-col items-center text-center group"
-                  >
-                    {/* Icon circle */}
-                    <div className={`relative w-20 h-20 border-2 ${c.border} glass-effect flex flex-col items-center justify-center mb-4 group-hover:${c.border.replace('/30', '/70')} transition-colors duration-300 group-hover:scale-110 transform transition-transform`}>
-                      <span className="text-2xl mb-1">{step.icon}</span>
-                      <span className={`font-mono text-[10px] ${c.text} opacity-60`}>{step.step}</span>
-                      {/* Corner accent */}
-                      <div className={`absolute -top-px -left-px w-3 h-3 border-t-2 border-l-2 ${c.border.replace('/30', '')}`} />
-                      <div className={`absolute -bottom-px -right-px w-3 h-3 border-b-2 border-r-2 ${c.border.replace('/30', '')}`} />
-                    </div>
-
-                    <h4 className={`font-bold text-sm mb-2 ${c.text}`}>{step.label}</h4>
-                    <p className="text-gray-600 text-xs leading-relaxed">{step.detail}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* AI Tools grid */}
-        <div>
-          <motion.h3
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="font-mono text-xs text-gray-500 tracking-widest text-center mb-10"
-          >
-            /* MY AI TOOLKIT */
-          </motion.h3>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {aiTools.map((tool, i) => (
-              <ToolCard key={tool.name} tool={tool} index={i} />
+          {/* Step cards */}
+          <div className="flex flex-col gap-16">
+            {STEPS.map((step, i) => (
+              <StepCard
+                key={step.id}
+                step={step}
+                index={i}
+                active={activeSteps[i]}
+                nodeRef={el => { nodeRefs.current[i] = el; }}
+              />
             ))}
           </div>
         </div>
 
-        {/* Bottom quote */}
+        {/* ── AI toolkit — CardSwap ────────────────────────────────── */}
+        <div className="mt-40">
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="font-mono text-xs text-gray-500 tracking-widest text-center mb-20"
+          >
+            {'/* MY AI TOOLKIT */'}
+          </motion.p>
+
+          {/* Two-column: left = label copy, right = CardSwap stack */}
+          <div className="flex flex-col md:flex-row items-center gap-12">
+
+            {/* Left — heading + blurb */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="flex-1 max-w-sm"
+            >
+              <p className="font-mono text-cyan-400 text-xs tracking-widest mb-3 opacity-70">
+                &gt; cat tools.json
+              </p>
+              <h3 className="text-2xl font-bold text-white mb-4">
+                The Stack Behind<br />
+                <span className="text-violet-400">Every Build</span>
+              </h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                Six tools. Each one earns its place. Together they cover the full
+                loop — from idea to deployed product.
+              </p>
+              <div className="flex flex-col gap-2">
+                {AI_TOOLS.map(t => (
+                  <div key={t.name} className="flex items-center gap-3">
+                    <span
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ background: t.color, boxShadow: `0 0 6px ${t.color}` }}
+                    />
+                    <span className="font-mono text-[11px] text-gray-400 tracking-wider">
+                      {t.name.toUpperCase()}
+                      <span className="text-gray-600 ml-2">— {t.role}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Right — CardSwap */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="flex-1 flex justify-center"
+              style={{ height: '420px', position: 'relative', minWidth: 340 }}
+            >
+              <CardSwap
+                width={300}
+                height={200}
+                cardDistance={50}
+                verticalDistance={60}
+                delay={500}
+                pauseOnHover={true}
+                skewAmount={4}
+                easing="linear"
+              >
+                {AI_TOOLS.map(tool => (
+                  <Card
+                    key={tool.name}
+                    style={{
+                      background: 'rgba(8,11,20,0.95)',
+                      border: `1px solid ${tool.color}35`,
+                      boxShadow: `0 0 30px ${tool.color}18, inset 0 0 40px ${tool.color}06`,
+                      padding: '24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                    }}
+                  >
+                    {/* Top row */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: 36, height: 36,
+                          borderRadius: 8,
+                          border: `1px solid ${tool.color}40`,
+                          background: `${tool.color}12`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 18, color: tool.color,
+                        }}>
+                          {tool.icon}
+                        </div>
+                        <div>
+                          <p style={{ color: '#f0f4ff', fontWeight: 700, fontSize: 14, margin: 0 }}>
+                            {tool.name}
+                          </p>
+                          <p style={{ color: tool.color, fontSize: 10, fontFamily: 'JetBrains Mono, monospace', opacity: 0.75, margin: 0 }}>
+                            {tool.role}
+                          </p>
+                        </div>
+                      </div>
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fontSize: 9,
+                        color: tool.color,
+                        background: `${tool.color}14`,
+                        border: `1px solid ${tool.color}35`,
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        letterSpacing: '0.1em',
+                      }}>
+                        {tool.tag}
+                      </span>
+                    </div>
+
+                    {/* Divider */}
+                    <div style={{ height: 1, background: `linear-gradient(90deg, ${tool.color}40, transparent)` }} />
+
+                    {/* Description */}
+                    <p style={{ color: '#6b7280', fontSize: 12, lineHeight: 1.6, margin: 0 }}>
+                      {tool.desc}
+                    </p>
+
+                    {/* Bottom corner accents */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: 14, height: 14,
+                      borderTop: `1.5px solid ${tool.color}60`, borderLeft: `1.5px solid ${tool.color}60` }} />
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 14, height: 14,
+                      borderBottom: `1.5px solid ${tool.color}60`, borderRight: `1.5px solid ${tool.color}60` }} />
+                  </Card>
+                ))}
+              </CardSwap>
+            </motion.div>
+
+          </div>
+        </div>
+
+        {/* ── Quote ────────────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="mt-16 text-center"
+          className="mt-20 text-center"
         >
           <div className="inline-block glass-effect border border-white/10 px-8 py-5 relative">
             <div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-cyan-400/40" />
             <div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-cyan-400/40" />
             <p className="text-gray-400 text-sm italic max-w-lg">
               &quot;I don&apos;t fight the future. I use it. AI handles the repetitive —
-              I handle the <span className="text-cyan-400 not-italic font-semibold">creative and strategic</span>.&quot;
+              I handle the{' '}
+              <span className="text-cyan-400 not-italic font-semibold">creative and strategic</span>.&quot;
             </p>
           </div>
         </motion.div>
+
       </div>
     </section>
   );

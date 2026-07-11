@@ -11,10 +11,8 @@ const TECHS = [
   { name: 'HTML5',      slug: 'html5',      color: '#E34F26', ribbon: '#b91c1c',  badge: 'medal' },
   { name: 'CSS',        slug: 'css',        color: '#1572B6', ribbon: '#1d4ed8',  badge: 'medal' },
   { name: 'Supabase',   slug: 'supabase',   color: '#3ECF8E', ribbon: '#059669',  badge: 'hex'   },
-  { name: 'PostgreSQL', slug: 'postgresql', color: '#4169E1', ribbon: '#3730a3',  badge: 'medal' },
   { name: 'Git',        slug: 'git',        color: '#F05032', ribbon: '#b91c1c',  badge: 'medal' },
   { name: 'GitHub',     slug: 'github',     color: '#e2e8f0', ribbon: '#64748b',  badge: 'medal' },
-  { name: 'Docker',     slug: 'docker',     color: '#2496ED', ribbon: '#1d4ed8',  badge: 'hex'   },
 ];
 
 interface Tech {
