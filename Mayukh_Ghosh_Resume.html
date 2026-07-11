@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayukh Ghosh - Resume</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .resume {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            box-shadow: 0 0 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        /* === LEFT SIDEBAR === */
+        .sidebar {
+            background: #1a2332;
+            color: white;
+            padding: 30px 20px;
+        }
+        
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .profile-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2d5a87, #4a90d9);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            color: white;
+            border: 3px solid #4a90d9;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .profile-title {
+            font-size: 11px;
+            color: #8ab4e8;
+            font-weight: 400;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+        
+        .sidebar-section h3 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #5ba3e6;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #5ba3e6;
+            display: inline-block;
+        }
+        
+        .sidebar-section ul {
+            list-style: none;
+        }
+        
+        .sidebar-section ul li {
+            font-size: 10px;
+            color: #d0d8e4;
+            margin-bottom: 7px;
+            padding-left: 12px;
+            position: relative;
+            line-height: 1.4;
+        }
+        
+        .sidebar-section ul li::before {
+            content: "\2022";
+            color: #5ba3e6;
+            font-size: 14px;
+            position: absolute;
+            left: 0;
+            top: -1px;
+        }
+        
+        .contact-item {
+            font-size: 10px;
+            color: #d0d8e4;
+            margin-bottom: 8px;
+            padding-left: 0;
+            line-height: 1.4;
+        }
+        
+        .contact-item::before {
+            display: none;
+        }
+        
+        .contact-label {
+            color: #8ab4e8;
+            font-weight: 600;
+            display: block;
+            font-size: 9px;
+            margin-bottom: 2px;
+        }
+        
+        .language-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .language-level {
+            color: #8ab4e8;
+            font-size: 9px;
+        }
+        
+        /* === RIGHT CONTENT === */
+        .main-content {
+            padding: 30px 30px;
+        }
+        
+        .section {
+            margin-bottom: 22px;
+        }
+        
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a2332;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 2.5px solid #2d5a87;
+            display: inline-block;
+        }
+        
+        .section-content {
+            margin-top: 10px;
+        }
+        
+        /* Profile */
+        .profile-text {
+            font-size: 10.5px;
+            color: #444;
+            line-height: 1.6;
+        }
+        
+        /* Projects */
+        .project-item {
+            margin-bottom: 14px;
+        }
+        
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 3px;
+        }
+        
+        .project-name {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #1a2332;
+        }
+        
+        .project-tech {
+            font-size: 9px;
+            color: #2d5a87;
+            font-style: italic;
+        }
+        
+        .project-bullets {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .project-bullets li {
+            font-size: 10px;
+            color: #444;
+            margin-bottom: 3px;
+            padding-left: 14px;
+            position: relative;
+            line-height: 1.5;
+        }
+        
+        .project-bullets li::before {
+            content: "\2022";
+            color: #2d5a87;
+            font-size: 12px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        /* Highlights */
+        .highlights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .highlight-item {
+            font-size: 10px;
+            color: #444;
+            padding-left: 14px;
+            position: relative;
+            line-height: 1.4;
+        }
+        
+        .highlight-item::before {
+            content: "\2022";
+            color: #2d5a87;
+            font-size: 12px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        .highlight-number {
+            font-weight: 700;
+            color: #1a2332;
+        }
+        
+        /* Technical Journey */
+        .journey {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        
+        .journey-item {
+            background: #e8f0fb;
+            color: #2d5a87;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+        
+        .journey-arrow {
+            display: flex;
+            align-items: center;
+            color: #999;
+            font-size: 12px;
+        }
+        
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .resume {
+                box-shadow: none;
+                width: 100%;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="resume">
+        <!-- LEFT SIDEBAR -->
+        <div class="sidebar">
+            <div class="profile-section">
+                <div class="profile-photo">MG</div>
+                <div class="profile-name">Mayukh Ghosh</div>
+                <div class="profile-title">Full-Stack Developer</div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Contact</h3>
+                <div class="contact-item">
+                    <span class="contact-label">Email</span>
+                    hello@mayukhghosh.dev
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">GitHub</span>
+                    github.com/MayukhFired
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">LinkedIn</span>
+                    linkedin.com/in/mayukhghosh
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">Portfolio</span>
+                    mayukhghosh.dev
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Skills</h3>
+                <ul>
+                    <li>React / Next.js</li>
+                    <li>TypeScript / JavaScript</li>
+                    <li>C (Systems Programming)</li>
+                    <li>Supabase / PostgreSQL</li>
+                    <li>Three.js / React Three Fiber</li>
+                    <li>Framer Motion / GSAP</li>
+                    <li>Tailwind CSS</li>
+                    <li>Docker</li>
+                    <li>Git / GitHub Actions</li>
+                    <li>REST API Design</li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Languages</h3>
+                <ul>
+                    <li class="language-item">
+                        <span>English</span>
+                        <span class="language-level">Proficient</span>
+                    </li>
+                    <li class="language-item">
+                        <span>Hindi</span>
+                        <span class="language-level">Native</span>
+                    </li>
+                    <li class="language-item">
+                        <span>Bengali</span>
+                        <span class="language-level">Native</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>AI Toolkit</h3>
+                <ul>
+                    <li>Kiro</li>
+                    <li>Claude</li>
+                    <li>Cursor</li>
+                    <li>GitHub Copilot</li>
+                    <li>v0 / Vercel</li>
+                    <li>ChatGPT</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- RIGHT CONTENT -->
+        <div class="main-content">
+            <div class="section">
+                <div class="section-title">Profile</div>
+                <div class="section-content">
+                    <p class="profile-text">
+                        I am a full-stack developer and systems programmer with experience in React, TypeScript, C, and Supabase. I have a strong track record of delivering high-performance SaaS products, open-source tools, and freelance solutions. I leverage AI-augmented workflows to achieve 5x faster delivery while maintaining enterprise-grade quality. I am a strong problem-solver and enjoy building products from zero to production.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Projects</div>
+                <div class="section-content">
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="project-name">NeoAuth - Authentication SaaS</span>
+                            <span class="project-tech">React, Supabase, SQL</span>
+                        </div>
+                        <ul class="project-bullets">
+                            <li>Built drop-in auth system with JWT, OAuth2, and magic links serving 10,000+ active users</li>
+                            <li>Achieved 99.9% uptime with &lt;50ms latency in production</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="project-name">CoreDB - Embedded Key-Value Store</span>
+                            <span class="project-tech">C, Open Source</span>
+                        </div>
+                        <ul class="project-bullets">
+                            <li>Designed blazing-fast KV store in pure C; zero dependencies, &lt;50KB binary</li>
+                            <li>Achieves 10M+ read ops/sec; 1.2K GitHub stars, used in production worldwide</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="project-name">FlowCMS - Headless CMS</span>
+                            <span class="project-tech">React, Supabase, TypeScript</span>
+                        </div>
+                        <ul class="project-bullets">
+                            <li>Built headless CMS with real-time collaboration and version history</li>
+                            <li>Serving 5 freelance clients with unlimited storage and real-time sync</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="project-name">ShipKit - Production React Starter</span>
+                            <span class="project-tech">React, Supabase, TypeScript</span>
+                        </div>
+                        <ul class="project-bullets">
+                            <li>Production-ready boilerplate with auth, DB, and TypeScript; 500+ downloads</li>
+                            <li>20+ pre-built features; enables launching projects in under 5 minutes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="project-name">PulseAPI - API Monitoring</span>
+                            <span class="project-tech">JavaScript, SQL, Docker</span>
+                        </div>
+                        <ul class="project-bullets">
+                            <li>API monitoring with live dashboards, alert webhooks, and 90-day retention</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="project-item">
+                        <div class="project-header">
+                            <span class="project-name">NetScan - Network Scanner</span>
+                            <span class="project-tech">C, Docker</span>
+                        </div>
+                        <ul class="project-bullets">
+                            <li>High-speed multithreaded network scanner supporting 10+ protocols</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Career Highlights</div>
+                <div class="section-content">
+                    <div class="highlights-grid">
+                        <div class="highlight-item"><span class="highlight-number">7+</span> products shipped</div>
+                        <div class="highlight-item"><span class="highlight-number">50K+</span> lines of code</div>
+                        <div class="highlight-item"><span class="highlight-number">5+</span> freelance clients</div>
+                        <div class="highlight-item"><span class="highlight-number">1+</span> years experience</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Technical Journey</div>
+                <div class="section-content">
+                    <div class="journey">
+                        <span class="journey-item">C</span>
+                        <span class="journey-arrow">&rarr;</span>
+                        <span class="journey-item">HTML/CSS</span>
+                        <span class="journey-arrow">&rarr;</span>
+                        <span class="journey-item">JavaScript</span>
+                        <span class="journey-arrow">&rarr;</span>
+                        <span class="journey-item">React</span>
+                        <span class="journey-arrow">&rarr;</span>
+                        <span class="journey-item">TypeScript</span>
+                        <span class="journey-arrow">&rarr;</span>
+                        <span class="journey-item">Supabase</span>
+                        <span class="journey-arrow">&rarr;</span>
+                        <span class="journey-item">Docker</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
