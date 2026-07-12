@@ -190,53 +190,70 @@ function ProjectIllustration({ id, color, isActive }: { id: number; color: strin
   }
 
   if (id === 4) {
-    // Trip Planner — airplane + map path + sun/clouds
+    // Graph Creator — bar chart + line chart + data points
     return (
       <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
-        {/* Sun */}
-        <motion.circle
-          cx="130" cy="25" r="14"
-          fill={`${color}25`}
-          animate={anim ? { scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] } : {}}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        {/* Grid lines */}
+        {[0, 1, 2, 3].map(i => (
+          <line key={`h-${i}`} x1="25" y1={30 + i * 22} x2="140" y2={30 + i * 22}
+                stroke={color} strokeWidth="0.5" opacity="0.15" />
+        ))}
+        {/* Y axis */}
+        <line x1="25" y1="25" x2="25" y2="100" stroke={color} strokeWidth="1.2" opacity="0.4" />
+        {/* X axis */}
+        <line x1="25" y1="100" x2="140" y2="100" stroke={color} strokeWidth="1.2" opacity="0.4" />
+        {/* Animated bars */}
+        {[0, 1, 2, 3, 4, 5].map(i => {
+          const heights = [35, 55, 25, 65, 45, 50];
+          const h = heights[i];
+          return (
+            <motion.rect
+              key={i}
+              x={32 + i * 18}
+              y={100 - h}
+              width="12"
+              height={h}
+              rx="2"
+              fill={`${color}${40 + i * 8}`}
+              initial={{ scaleY: 0 }}
+              animate={anim ? { scaleY: [0, 1, 1] } : { scaleY: 1 }}
+              transition={{ duration: 0.6, delay: anim ? i * 0.12 : 0 }}
+              style={{ transformOrigin: `${38 + i * 18}px 100px` }}
+            />
+          );
+        })}
+        {/* Line chart overlay */}
+        <motion.path
+          d="M 38 65 L 56 45 L 74 75 L 92 35 L 110 55 L 128 50"
+          stroke={color}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          initial={{ pathLength: 0 }}
+          animate={anim ? { pathLength: 1 } : { pathLength: 1 }}
+          transition={{ duration: 1.2, delay: 0.5 }}
         />
-        {/* Sun rays */}
-        {anim && [0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
-          <motion.line
-            key={deg}
-            x1={130 + Math.cos(deg * Math.PI / 180) * 17}
-            y1={25 + Math.sin(deg * Math.PI / 180) * 17}
-            x2={130 + Math.cos(deg * Math.PI / 180) * 22}
-            y2={25 + Math.sin(deg * Math.PI / 180) * 22}
-            stroke={color} strokeWidth="1.5" strokeLinecap="round"
-            animate={{ opacity: [0.3, 0.7, 0.3] }}
-            transition={{ duration: 2, delay: i * 0.15, repeat: Infinity }}
+        {/* Data points on line */}
+        {[[38,65],[56,45],[74,75],[92,35],[110,55],[128,50]].map(([cx,cy], i) => (
+          <motion.circle
+            key={i}
+            cx={cx} cy={cy} r="3.5"
+            fill={color}
+            initial={{ scale: 0 }}
+            animate={anim ? { scale: 1 } : { scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.8 + i * 0.1 }}
           />
         ))}
-        {/* Map/route line */}
-        <motion.path
-          d="M 20 90 Q 50 50, 80 70 Q 110 90, 140 55"
-          stroke={color} strokeWidth="2" strokeDasharray="5 5" fill="none" strokeLinecap="round"
-          animate={anim ? { strokeDashoffset: [0, -30] } : {}}
-          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-        />
-        {/* Route dots */}
-        <circle cx="20" cy="90" r="4" fill={color} opacity="0.7" />
-        <circle cx="80" cy="70" r="3" fill={color} opacity="0.5" />
-        <circle cx="140" cy="55" r="4" fill={color} opacity="0.7" />
-        {/* Airplane */}
+        {/* Floating plus icon */}
         <motion.g
-          animate={anim ? { x: [0, 5, 0], y: [0, -4, 0], rotate: [-5, 5, -5] } : {}}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ transformOrigin: '80px 45px' }}
+          animate={anim ? { y: [-2, 2, -2] } : {}}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <path d="M 70 45 L 80 38 L 90 45 L 86 47 L 80 42 L 74 47 Z" fill={color} opacity="0.9" />
-          <rect x="77" y="42" width="6" height="15" rx="2" fill={color} opacity="0.7" />
-          <path d="M 73 52 L 80 50 L 87 52" stroke={color} strokeWidth="1.5" fill="none" />
+          <circle cx="135" cy="28" r="8" fill={`${color}25`} stroke={color} strokeWidth="1" />
+          <line x1="132" y1="28" x2="138" y2="28" stroke={color} strokeWidth="1.5" />
+          <line x1="135" y1="25" x2="135" y2="31" stroke={color} strokeWidth="1.5" />
         </motion.g>
-        {/* "Under construction" badge */}
-        <rect x="45" y="100" width="70" height="14" rx="3" fill={`${color}20`} stroke={color} strokeWidth="0.8" />
-        <text x="80" y="110" textAnchor="middle" fontSize="7" fontFamily="JetBrains Mono, monospace" fill={color} opacity="0.7">🚧 UNDER CONSTRUCTION</text>
       </svg>
     );
   }

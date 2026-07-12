@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import TiltedCard from './TiltedCard';
 
 type FormState = 'idle' | 'sending' | 'success' | 'error';
 
@@ -107,56 +108,50 @@ export default function Contact() {
 
         <div className="grid lg:grid-cols-5 gap-16 items-start">
 
-          {/* Left: Contact info */}
+          {/* Left: Photo + Terminal stacked */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="lg:col-span-2 space-y-6"
+            className="lg:col-span-2 flex flex-col items-center gap-6"
           >
-            <div className="font-mono text-xs text-purple-400 opacity-70 mb-6">/* CONNECT */</div>
-
-            {contactInfo.map((info, i) => (
-              <motion.div
-                key={info.label}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="glass-effect p-4 border border-white/5 hover:border-cyan-400/30 transition-all duration-300 group"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 border border-cyan-400/30 flex items-center justify-center text-lg group-hover:border-cyan-400 transition-colors duration-300">
-                    {info.icon}
-                  </div>
-                  <div>
-                    <div className="text-gray-500 text-xs font-mono">{info.label}</div>
-                    {info.href ? (
-                      <a
-                        href={info.href}
-                        className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors"
-                        target={info.href.startsWith('http') ? '_blank' : undefined}
-                        rel="noopener noreferrer"
-                      >
-                        {info.value}
-                      </a>
-                    ) : (
-                      <span className="text-white text-sm">{info.value}</span>
-                    )}
-                  </div>
+            <TiltedCard
+              imageSrc="/avatar-mayukh.jpg"
+              altText="Mayukh Ghosh"
+              captionText="Mayukh Ghosh"
+              containerHeight="420px"
+              containerWidth="100%"
+              imageHeight="400px"
+              imageWidth="300px"
+              rotateAmplitude={12}
+              scaleOnHover={1.08}
+              showMobileWarning={false}
+              showTooltip={true}
+              displayOverlayContent={true}
+              overlayContent={
+                <div style={{
+                  width: '300px',
+                  height: '400px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '24px',
+                  borderRadius: '15px',
+                  background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.85) 100%)',
+                }}>
+                  <p style={{ color: '#fff', fontWeight: 700, fontSize: '18px', margin: 0 }}>
+                    Mayukh Ghosh
+                  </p>
+                  <p style={{ color: '#22d3ee', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', marginTop: '4px' }}>
+                    Software Developer
+                  </p>
                 </div>
-              </motion.div>
-            ))}
+              }
+            />
 
             {/* Terminal block */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              className="glass-effect p-4 border border-white/5 font-mono text-xs mt-8"
-            >
+            <div className="w-full glass-effect p-4 border border-white/5 font-mono text-xs">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-2 h-2 rounded-full bg-red-500" />
                 <div className="w-2 h-2 rounded-full bg-yellow-500" />
@@ -169,7 +164,7 @@ export default function Contact() {
                 <p><span className="text-cyan-400">✓</span> Encryption: TLS 1.3</p>
                 <p><span className="text-green-400">●</span> Ready to receive...</p>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Right: Form */}
