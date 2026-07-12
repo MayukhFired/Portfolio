@@ -4,6 +4,363 @@ import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { projects, STATUS_COLOR, type Project } from './shared';
 
+// ─── Animated SVG illustrations per project ────────────────────────────────────
+function ProjectIllustration({ id, color, isActive }: { id: number; color: string; isActive: boolean }) {
+  const anim = isActive;
+
+  if (id === 1) {
+    // Quick Dash — delivery scooter + location pin + route dots
+    return (
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+        {/* Route dots */}
+        {[0, 1, 2, 3, 4].map(i => (
+          <motion.circle
+            key={i}
+            cx={30 + i * 25}
+            cy={85}
+            r="3"
+            fill={color}
+            animate={anim ? { opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] } : { opacity: 0.3 }}
+            transition={{ duration: 1.2, delay: i * 0.2, repeat: Infinity }}
+          />
+        ))}
+        {/* Route line */}
+        <motion.path
+          d="M 20 85 Q 80 85, 140 85"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeDasharray="4 6"
+          fill="none"
+          opacity="0.3"
+          animate={anim ? { strokeDashoffset: [0, -40] } : {}}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        />
+        {/* Scooter body */}
+        <motion.g
+          animate={anim ? { x: [0, 8, 0] } : { x: 0 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          {/* Body */}
+          <rect x="55" y="40" width="40" height="28" rx="6" fill={`${color}30`} stroke={color} strokeWidth="1.5" />
+          {/* Box on back */}
+          <rect x="42" y="38" width="18" height="22" rx="3" fill={`${color}20`} stroke={color} strokeWidth="1.2" />
+          <text x="51" y="52" textAnchor="middle" fontSize="8" fill={color}>📦</text>
+          {/* Handle */}
+          <path d="M 92 44 Q 98 38 102 44" stroke={color} strokeWidth="2" strokeLinecap="round" fill="none" />
+          {/* Front wheel */}
+          <circle cx="90" cy="72" r="9" fill="none" stroke={color} strokeWidth="2" />
+          <circle cx="90" cy="72" r="3" fill={color} opacity="0.5" />
+          {/* Back wheel */}
+          <circle cx="55" cy="72" r="9" fill="none" stroke={color} strokeWidth="2" />
+          <circle cx="55" cy="72" r="3" fill={color} opacity="0.5" />
+        </motion.g>
+        {/* Location pin at destination */}
+        <motion.g
+          animate={anim ? { y: [-3, 3, -3] } : { y: 0 }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <path d="M 135 30 C 135 20, 145 20, 145 30 C 145 38, 140 42, 140 42 C 140 42, 135 38, 135 30 Z" fill={color} opacity="0.8" />
+          <circle cx="140" cy="29" r="3" fill="rgba(7,9,18,0.8)" />
+        </motion.g>
+      </svg>
+    );
+  }
+
+  if (id === 2) {
+    // Samvidhan — open book + scales of justice + gavel
+    return (
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+        {/* Open book */}
+        <motion.g
+          animate={anim ? { rotateY: [0, 5, 0] } : {}}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: '80px 70px' }}
+        >
+          {/* Left page */}
+          <path d="M 35 40 L 35 95 Q 80 90, 80 95 L 80 40 Q 80 38, 35 40 Z" fill={`${color}18`} stroke={color} strokeWidth="1.2" />
+          {/* Right page */}
+          <path d="M 125 40 L 125 95 Q 80 90, 80 95 L 80 40 Q 80 38, 125 40 Z" fill={`${color}18`} stroke={color} strokeWidth="1.2" />
+          {/* Page lines left */}
+          {[0, 1, 2, 3].map(i => (
+            <motion.line
+              key={`l-${i}`}
+              x1="42" y1={52 + i * 10} x2="73" y2={52 + i * 10}
+              stroke={color} strokeWidth="1" strokeLinecap="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={anim ? { pathLength: 1, opacity: 0.4 } : { pathLength: 0, opacity: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 + i * 0.2 }}
+            />
+          ))}
+          {/* Page lines right */}
+          {[0, 1, 2, 3].map(i => (
+            <motion.line
+              key={`r-${i}`}
+              x1="87" y1={52 + i * 10} x2="118" y2={52 + i * 10}
+              stroke={color} strokeWidth="1" strokeLinecap="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={anim ? { pathLength: 1, opacity: 0.4 } : { pathLength: 0, opacity: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 + i * 0.2 }}
+            />
+          ))}
+        </motion.g>
+        {/* Scales of justice on top */}
+        <motion.g
+          animate={anim ? { rotate: [-3, 3, -3] } : { rotate: 0 }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: '80px 25px' }}
+        >
+          {/* Pillar */}
+          <line x1="80" y1="15" x2="80" y2="35" stroke={color} strokeWidth="2" />
+          {/* Beam */}
+          <line x1="60" y1="18" x2="100" y2="18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          {/* Left pan */}
+          <path d="M 55 18 L 52 28 L 68 28 L 65 18" stroke={color} strokeWidth="1.2" fill={`${color}20`} />
+          {/* Right pan */}
+          <path d="M 95 18 L 92 28 L 108 28 L 105 18" stroke={color} strokeWidth="1.2" fill={`${color}20`} />
+          {/* Top circle */}
+          <circle cx="80" cy="14" r="3" fill={color} opacity="0.7" />
+        </motion.g>
+      </svg>
+    );
+  }
+
+  if (id === 3) {
+    // MCP Shield — shield with lock + scanning waves
+    return (
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+        {/* Scanning waves */}
+        {[0, 1, 2].map(i => (
+          <motion.circle
+            key={i}
+            cx="80" cy="60" r={30 + i * 15}
+            stroke={color}
+            strokeWidth="1"
+            fill="none"
+            animate={anim ? { opacity: [0.4, 0, 0.4], scale: [1, 1.1, 1] } : { opacity: 0.1 }}
+            transition={{ duration: 2, delay: i * 0.5, repeat: Infinity }}
+          />
+        ))}
+        {/* Shield shape */}
+        <motion.path
+          d="M 80 20 L 105 32 L 105 62 Q 105 88, 80 100 Q 55 88, 55 62 L 55 32 Z"
+          fill={`${color}18`}
+          stroke={color}
+          strokeWidth="2"
+          animate={anim ? { strokeDashoffset: [0, -10] } : {}}
+          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          strokeDasharray="6 4"
+        />
+        {/* Inner shield */}
+        <path
+          d="M 80 30 L 97 38 L 97 60 Q 97 78, 80 88 Q 63 78, 63 60 L 63 38 Z"
+          fill={`${color}08`}
+          stroke={color}
+          strokeWidth="1"
+          opacity="0.6"
+        />
+        {/* Lock icon */}
+        <motion.g
+          animate={anim ? { y: [-2, 2, -2] } : { y: 0 }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          {/* Lock body */}
+          <rect x="72" y="55" width="16" height="14" rx="3" fill={color} opacity="0.7" />
+          {/* Lock shackle */}
+          <path d="M 75 55 L 75 48 A 5 5 0 0 1 85 48 L 85 55" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Keyhole */}
+          <circle cx="80" cy="61" r="2.5" fill="rgba(7,9,18,0.9)" />
+          <rect x="79" y="62" width="2" height="4" rx="1" fill="rgba(7,9,18,0.9)" />
+        </motion.g>
+        {/* Checkmark that appears */}
+        {anim && (
+          <motion.path
+            d="M 72 75 L 78 81 L 90 69"
+            stroke={color}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          />
+        )}
+      </svg>
+    );
+  }
+
+  if (id === 4) {
+    // Trip Planner — airplane + map path + sun/clouds
+    return (
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+        {/* Sun */}
+        <motion.circle
+          cx="130" cy="25" r="14"
+          fill={`${color}25`}
+          animate={anim ? { scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] } : {}}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        {/* Sun rays */}
+        {anim && [0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => (
+          <motion.line
+            key={deg}
+            x1={130 + Math.cos(deg * Math.PI / 180) * 17}
+            y1={25 + Math.sin(deg * Math.PI / 180) * 17}
+            x2={130 + Math.cos(deg * Math.PI / 180) * 22}
+            y2={25 + Math.sin(deg * Math.PI / 180) * 22}
+            stroke={color} strokeWidth="1.5" strokeLinecap="round"
+            animate={{ opacity: [0.3, 0.7, 0.3] }}
+            transition={{ duration: 2, delay: i * 0.15, repeat: Infinity }}
+          />
+        ))}
+        {/* Map/route line */}
+        <motion.path
+          d="M 20 90 Q 50 50, 80 70 Q 110 90, 140 55"
+          stroke={color} strokeWidth="2" strokeDasharray="5 5" fill="none" strokeLinecap="round"
+          animate={anim ? { strokeDashoffset: [0, -30] } : {}}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        />
+        {/* Route dots */}
+        <circle cx="20" cy="90" r="4" fill={color} opacity="0.7" />
+        <circle cx="80" cy="70" r="3" fill={color} opacity="0.5" />
+        <circle cx="140" cy="55" r="4" fill={color} opacity="0.7" />
+        {/* Airplane */}
+        <motion.g
+          animate={anim ? { x: [0, 5, 0], y: [0, -4, 0], rotate: [-5, 5, -5] } : {}}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: '80px 45px' }}
+        >
+          <path d="M 70 45 L 80 38 L 90 45 L 86 47 L 80 42 L 74 47 Z" fill={color} opacity="0.9" />
+          <rect x="77" y="42" width="6" height="15" rx="2" fill={color} opacity="0.7" />
+          <path d="M 73 52 L 80 50 L 87 52" stroke={color} strokeWidth="1.5" fill="none" />
+        </motion.g>
+        {/* "Under construction" badge */}
+        <rect x="45" y="100" width="70" height="14" rx="3" fill={`${color}20`} stroke={color} strokeWidth="0.8" />
+        <text x="80" y="110" textAnchor="middle" fontSize="7" fontFamily="JetBrains Mono, monospace" fill={color} opacity="0.7">🚧 UNDER CONSTRUCTION</text>
+      </svg>
+    );
+  }
+
+  if (id === 5) {
+    // Offline SOS — radio waves + phone + SOS signal
+    return (
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+        {/* Bluetooth/WiFi waves expanding */}
+        {[0, 1, 2, 3].map(i => (
+          <motion.circle
+            key={i}
+            cx="80" cy="55" r={20 + i * 14}
+            stroke={color} strokeWidth="1.2" fill="none"
+            animate={anim ? { opacity: [0.5, 0, 0.5], scale: [1, 1.05, 1] } : { opacity: 0.12 }}
+            transition={{ duration: 1.8, delay: i * 0.35, repeat: Infinity }}
+          />
+        ))}
+        {/* Phone shape (center) */}
+        <motion.g
+          animate={anim ? { rotate: [0, -3, 3, 0] } : {}}
+          transition={{ duration: 0.5, delay: 0.8, repeat: Infinity, repeatDelay: 2.5 }}
+          style={{ transformOrigin: '80px 55px' }}
+        >
+          <rect x="68" y="35" width="24" height="42" rx="4" fill={`${color}20`} stroke={color} strokeWidth="1.5" />
+          <rect x="71" y="40" width="18" height="28" rx="2" fill="rgba(7,9,18,0.9)" />
+          {/* SOS text on screen */}
+          <text x="80" y="58" textAnchor="middle" fontSize="10" fontFamily="JetBrains Mono, monospace" fill={color} fontWeight="bold">SOS</text>
+          {/* Home button */}
+          <circle cx="80" cy="72" r="2" stroke={color} strokeWidth="1" fill="none" />
+        </motion.g>
+        {/* Two smaller phones on sides */}
+        <motion.rect
+          x="30" y="48" width="14" height="24" rx="3"
+          fill={`${color}15`} stroke={color} strokeWidth="1"
+          animate={anim ? { opacity: [0.4, 1, 0.4] } : { opacity: 0.3 }}
+          transition={{ duration: 2, delay: 0.5, repeat: Infinity }}
+        />
+        <motion.rect
+          x="116" y="48" width="14" height="24" rx="3"
+          fill={`${color}15`} stroke={color} strokeWidth="1"
+          animate={anim ? { opacity: [0.4, 1, 0.4] } : { opacity: 0.3 }}
+          transition={{ duration: 2, delay: 1, repeat: Infinity }}
+        />
+        {/* Connection lines */}
+        <motion.line
+          x1="44" y1="60" x2="68" y2="55"
+          stroke={color} strokeWidth="1" strokeDasharray="3 3"
+          animate={anim ? { opacity: [0.3, 0.9, 0.3] } : { opacity: 0.2 }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+        <motion.line
+          x1="116" y1="60" x2="92" y2="55"
+          stroke={color} strokeWidth="1" strokeDasharray="3 3"
+          animate={anim ? { opacity: [0.3, 0.9, 0.3] } : { opacity: 0.2 }}
+          transition={{ duration: 1.5, delay: 0.5, repeat: Infinity }}
+        />
+        {/* Under construction badge */}
+        <rect x="45" y="100" width="70" height="14" rx="3" fill={`${color}20`} stroke={color} strokeWidth="0.8" />
+        <text x="80" y="110" textAnchor="middle" fontSize="7" fontFamily="JetBrains Mono, monospace" fill={color} opacity="0.7">🚧 UNDER CONSTRUCTION</text>
+      </svg>
+    );
+  }
+
+  if (id === 6) {
+    // Banking Site — credit card + coins + chart
+    return (
+      <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
+        {/* Bar chart in background */}
+        {[0, 1, 2, 3, 4].map(i => (
+          <motion.rect
+            key={i}
+            x={25 + i * 16}
+            y={90 - (15 + i * 10)}
+            width="10"
+            height={15 + i * 10}
+            rx="2"
+            fill={`${color}${20 + i * 8}`}
+            animate={anim ? { height: [15 + i * 10, 20 + i * 12, 15 + i * 10], y: [90 - (15 + i * 10), 90 - (20 + i * 12), 90 - (15 + i * 10)] } : {}}
+            transition={{ duration: 2, delay: i * 0.2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        ))}
+        {/* Credit card */}
+        <motion.g
+          animate={anim ? { y: [-2, 3, -2], rotate: [-2, 2, -2] } : {}}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ transformOrigin: '115px 50px' }}
+        >
+          <rect x="90" y="30" width="55" height="35" rx="5" fill={`${color}25`} stroke={color} strokeWidth="1.5" />
+          {/* Card stripe */}
+          <rect x="90" y="42" width="55" height="7" fill={`${color}40`} />
+          {/* Card chip */}
+          <rect x="96" y="34" width="10" height="7" rx="1.5" fill={color} opacity="0.6" />
+          {/* Card number dots */}
+          {[0, 1, 2, 3].map(i => (
+            <circle key={i} cx={100 + i * 5} cy="56" r="1.5" fill={color} opacity="0.4" />
+          ))}
+          <text x="125" y="57" fontSize="6" fontFamily="JetBrains Mono, monospace" fill={color} opacity="0.5">••••</text>
+        </motion.g>
+        {/* Dollar/Rupee sign */}
+        <motion.text
+          x="45" y="45"
+          fontSize="22" fontWeight="bold" fontFamily="JetBrains Mono, monospace"
+          fill={color} opacity="0.6"
+          animate={anim ? { opacity: [0.4, 0.8, 0.4] } : {}}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          ₹
+        </motion.text>
+        {/* Trend line */}
+        <motion.path
+          d="M 25 95 L 45 88 L 65 92 L 85 80 L 105 85"
+          stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round"
+          animate={anim ? { pathLength: [0, 1] } : { pathLength: 1 }}
+          transition={{ duration: 1.5, delay: 0.3 }}
+        />
+      </svg>
+    );
+  }
+
+  // Fallback
+  return <span style={{ fontSize: 48 }}>{projects.find(p => p.id === id)?.icon}</span>;
+}
+
 function ProjectCard({
   project,
   index,
@@ -20,7 +377,9 @@ function ProjectCard({
   const sc       = STATUS_COLOR[project.status];
   const isDimmed = activeIndex !== null && activeIndex !== index;
   const isActive = activeIndex === index;
-  const hasLive  = project.live !== '#' && project.live !== '';
+  const hasLive   = project.live !== '#' && project.live !== '';
+  const hasGithub = project.github !== '#' && project.github !== '';
+  const hasLinks  = hasLive || hasGithub;
 
   const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     cancelAnimationFrame(rafRef.current);
@@ -89,40 +448,9 @@ function ProjectCard({
             </div>
           </div>
 
-          {/* Screenshot or placeholder — sits below the chrome bar */}
-          <div style={{ position: 'absolute', top: 28, left: 0, right: 0, bottom: 0 }}>
-            {project.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={project.image}
-                alt={`${project.title} screenshot`}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'top center',
-                  display: 'block',
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 12,
-                  background: `linear-gradient(135deg, ${project.color}14 0%, rgba(7,9,18,1) 70%)`,
-                }}
-              >
-                <span style={{ fontSize: 44 }}>{project.icon}</span>
-                <span className="font-mono text-[10px] tracking-widest" style={{ color: `${project.color}55` }}>
-                  PREVIEW COMING SOON
-                </span>
-              </div>
-            )}
+          {/* Animated illustration — sits below the chrome bar */}
+          <div style={{ position: 'absolute', top: 28, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${project.color}10 0%, rgba(7,9,18,1) 80%)` }}>
+            <ProjectIllustration id={project.id} color={project.color} isActive={isActive} />
           </div>
 
           {/* Bottom gradient overlay */}
@@ -203,16 +531,18 @@ function ProjectCard({
           <div className="h-px w-full" style={{ background: `linear-gradient(90deg, ${project.color}30, transparent)` }} />
 
           {/* ── Buttons ─────────────────────────────────────────── */}
+          {hasLinks ? (
           <div className="flex gap-3">
 
-            {/* GitHub — flex-1 always */}
+            {/* GitHub — full width if no live URL */}
+            {hasGithub && (
             <a
               href={project.github}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 py-2.5 rounded-lg font-mono text-[11px] tracking-wide transition-all duration-200"
               style={{
-                flex: hasLive ? '1' : '0 0 100%',   // full width if no live URL
+                flex: hasLive ? '1' : '0 0 100%',
                 color: project.color,
                 border: `1px solid ${project.color}35`,
                 background: `${project.color}08`,
@@ -231,15 +561,17 @@ function ProjectCard({
               </svg>
               GitHub
             </a>
+            )}
 
-            {/* Live Site — only rendered when hasLive */}
+            {/* Live Site */}
             {hasLive && (
               <a
                 href={project.live}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-mono text-[11px] tracking-wide transition-all duration-200"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-lg font-mono text-[11px] tracking-wide transition-all duration-200"
                 style={{
+                  flex: hasGithub ? '1' : '0 0 100%',
                   color: '#f0f4ff',
                   background: `${project.color}22`,
                   border: `1px solid ${project.color}45`,
@@ -263,6 +595,12 @@ function ProjectCard({
             )}
 
           </div>
+          ) : (
+            /* No links — coming soon */
+            <div className="flex items-center justify-center py-2.5 rounded-lg font-mono text-[11px] tracking-widest" style={{ color: `${project.color}88`, background: `${project.color}0a`, border: `1px dashed ${project.color}30` }}>
+              🚧 Coming Soon
+            </div>
+          )}
         </div>
 
         {/* Bottom glow strip on active */}
