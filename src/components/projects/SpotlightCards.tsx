@@ -258,7 +258,7 @@ function ProjectIllustration({ id, color, isActive }: { id: number; color: strin
     );
   }
 
-  if (id === 5) {
+  if (id === 6) {
     // Offline SOS — radio waves + phone + SOS signal
     return (
       <svg width="160" height="120" viewBox="0 0 160 120" fill="none">
@@ -318,7 +318,7 @@ function ProjectIllustration({ id, color, isActive }: { id: number; color: strin
     );
   }
 
-  if (id === 6) {
+  if (id === 5) {
     // Banking Site — credit card + coins + chart
     return (
       <svg width="160" height="120" viewBox="0 0 160 120" fill="none">

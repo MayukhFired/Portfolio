@@ -44,8 +44,10 @@ export default function TiltedCard({
   const ref = useRef<HTMLElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotateX = useSpring(useMotionValue(0), springValues);
-  const rotateY = useSpring(useMotionValue(0), springValues);
+  const rotateXVal = useMotionValue(0);
+  const rotateYVal = useMotionValue(0);
+  const rotateX = useSpring(rotateXVal, springValues);
+  const rotateY = useSpring(rotateYVal, springValues);
   const scale = useSpring(1, springValues);
   const opacity = useSpring(0);
   const rotateFigcaption = useSpring(0, { stiffness: 350, damping: 30, mass: 1 });

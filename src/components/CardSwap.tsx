@@ -192,7 +192,7 @@ const CardSwap = ({
             (child.props as CardProps).onClick?.(e);
             onCardClick?.(i);
           },
-        })
+        } as any)
       : child,
   );
 

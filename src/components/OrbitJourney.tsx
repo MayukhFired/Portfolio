@@ -285,8 +285,8 @@ interface MonitorProps {
 export function CRTMonitor({ activeNode, powered, width = 440 }: MonitorProps) {
   const accent = activeNode?.colorHex ?? '#22d3ee';
   const scale = width / 440;
-  const screenHeight = 330 * scale;
-  const terminalHeight = 278 * scale;
+  const screenHeight = 264 * scale;
+  const terminalHeight = 212 * scale;
 
   return (
     <div className="relative flex flex-col items-center select-none pointer-events-none" style={{ width }}>
